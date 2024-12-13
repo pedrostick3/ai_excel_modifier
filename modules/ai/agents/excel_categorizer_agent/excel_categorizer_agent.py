@@ -25,7 +25,7 @@ class ExcelCategorizerAgent:
         self,
         file_name: str,
         excel_data: str,
-        response_format: dict = None,
+        ai_analytics_file_name: str = None,
         log_messages: bool = True,
     ) -> str:
         """
@@ -34,6 +34,7 @@ class ExcelCategorizerAgent:
         Args:
             file_name (str): The file name to be used.
             excel_data (str): The Excel data to be used.
+            ai_analytics_file_name (str): The AI analytics file name to be used.
             log_messages (bool): Flag to indicate if the request messages should be logged.
 
         Returns:
@@ -41,7 +42,7 @@ class ExcelCategorizerAgent:
         """
         try:
             user_prompt = f"""
-The file {file_name} has the following content:
+Filename = '{file_name}'
 ```csv
 {excel_data}
 ```
@@ -52,8 +53,7 @@ The file {file_name} has the following content:
                 example_prompts=prompts.EXAMPLE_PROMPTS,
                 first_user_prompt=user_prompt,
                 use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
-                response_format=response_format,
-                ai_analytics_file_name=file_name,
+                ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
                 ai_analytics_agent_name="ExcelCategorizerAgent",
                 log_request_messages=log_messages,
                 log_response_message=log_messages,
@@ -64,21 +64,29 @@ The file {file_name} has the following content:
             logging.error(f"Erro ao comunicar com o AI ExcelHeaderFinderAgent: {e}")
             raise
 
-    def do_your_work_with(self, excel_file_path: str, invalid_output_path: str = configs.OUTPUT_FOLDER) -> FileCategory:
+    def do_your_work_with(
+        self,
+        excel_file_path: str,
+        invalid_output_path: str = configs.OUTPUT_FOLDER,
+        ai_analytics_file_name: str = None,
+    ) -> FileCategory:
         """
         Do the agent's work with the given parameters.
 
         Args:
-            file_path (str): The file path to be used.
+            excel_file_path (str): The Excel file path.
+            invalid_output_path (str): The invalid output path.
+            ai_analytics_file_name (str): The AI analytics file name.
 
         Returns:
             str: The file's category.
         """
-        excel_data_first_10_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=10)
+        excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         file_name = os.path.basename(excel_file_path)
         excel_categortizer_agent_response = self.ask_ai(
             file_name=file_name,
-            excel_data=excel_data_first_10_rows,
+            excel_data=excel_data_first_5_rows,
+            ai_analytics_file_name=ai_analytics_file_name,
         )
 
         try:

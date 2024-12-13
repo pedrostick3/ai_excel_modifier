@@ -83,7 +83,7 @@ class ExcelService:
                 raise ValueError(f"Content '{excel_row_content}' not found in the file.")
 
             row_number = matching_rows.index[0]
-            return row_number
+            return row_number + 1
         except Exception as e:
             logging.error(f"Error finding the row number: {e}")
             raise
@@ -282,5 +282,59 @@ class ExcelService:
             return True
         except Exception as e:
             logging.error(f"Error adding data to the file: {e}")
+            return False
+    
+    @staticmethod
+    def sumColumnsAndAddTotalColumnAtBottom(
+        excel_input_file_path: str,
+        header_row_number: int,
+        excel_output_file_path: str,
+        columns: list[str],
+    ) -> bool:
+        """
+        Sums the specified columns in an Excel or CSV file and adds a new row with the totals at the bottom.
+
+        Args:
+            excel_input_file_path (str): The path to the Excel or CSV file.
+            header_row_number (int): The row number of the header in the file.
+            excel_output_file_path (str): The path to save the resulting file.
+            columns (list[str]): A list of column names to sum.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+        try:
+            # Read the file into a DataFrame
+            _, file_extension = os.path.splitext(excel_input_file_path)
+            if file_extension.lower() == '.csv':
+                original_dataFrame = pd.read_csv(excel_input_file_path, header=None)
+                dataFrame = pd.read_csv(excel_input_file_path, header=header_row_number-1)
+            else:
+                original_dataFrame = pd.read_excel(excel_input_file_path, header=None)
+                dataFrame = pd.read_excel(excel_input_file_path, header=header_row_number-1)
+
+            # Try to convert the columns to numeric values without changing the original values
+            columns_sums = {column: pd.to_numeric(dataFrame[column].astype(str).str.replace(',', '.').astype(float), errors='coerce').sum() for column in columns}
+            columns_number_index = {column: dataFrame.columns.get_loc(column) for column in columns}
+
+            # Add a new row with the totals at the bottom
+            new_row = ['' for _ in range(len(dataFrame.columns))]
+            for column, sum_value in columns_sums.items():
+                new_row[columns_number_index[column]] = sum_value
+
+            # Append the new row to the DataFrame
+            original_dataFrame = pd.concat([original_dataFrame, pd.DataFrame([new_row], columns=original_dataFrame.columns)], ignore_index=True, sort=False)
+
+            # Save the modified DataFrame to the output file
+            if file_extension.lower() == '.csv':
+                original_dataFrame.to_csv(excel_output_file_path, index=False, header=False)
+                logging.info(f"File successfully saved as CSV at: {excel_output_file_path}")
+            else:
+                original_dataFrame.to_excel(excel_output_file_path, index=False, header=False, engine='openpyxl')
+                logging.info(f"File successfully saved as Excel at: {excel_output_file_path}")
+
+            return True
+        except Exception as e:
+            logging.error(f"Error summing columns in the file: {e}")
             return False
         

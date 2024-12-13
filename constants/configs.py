@@ -2,7 +2,7 @@
 INPUT_FOLDER = "./assets/docs_input"
 OUTPUT_FOLDER = "./assets/docs_output"
 TEST_EXECUTION_EXAMPLE_FILE = "./assets/example_test_execution_main.py"
-MAX_EXCEL_LINES_PER_AI_REQUEST = 20
+MAX_EXCEL_LINES_PER_AI_REQUEST = 5
 
 # Free AI APIs: https://github.com/zukixa/cool-ai-stuff
 

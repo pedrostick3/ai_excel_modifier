@@ -21,7 +21,7 @@ class AiFilesAnalyticsModel(object):
                 total_execution_time += agent_request.execution_time_in_seconds
             formatted_time = AnalyticsUtils.format_time_from_seconds(total_execution_time)
             
-            to_return += f"##### {key} - Demorou {formatted_time} #####\n"
+            to_return += f"##### {key} - Demorou {formatted_time}.\n"
             for agent_request in value:
                 to_return += f"\t{agent_request}\n"
 

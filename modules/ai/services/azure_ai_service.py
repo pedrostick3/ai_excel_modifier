@@ -93,6 +93,7 @@ class AzureAiService:
             AiAnalytics.add_file_agent_request(
                 file_name=ai_analytics_file_name,
                 agent_name=ai_analytics_agent_name,
+                ai_model=model,
                 prompt_tokens=response["usage"]["prompt_tokens"],
                 completion_tokens=response["usage"]["completion_tokens"],
                 total_tokens=response["usage"]["total_tokens"],

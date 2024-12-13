@@ -42,11 +42,7 @@ class ExcelHeaderFinderAgent:
             str: The AI's response.
         """
         try:
-            user_prompt = f"""
-```csv
-{excel_data}
-```
-"""
+            user_prompt = f"""{excel_data}"""
             ai_response = self.ai_service.ask_ai(
                 model=self.model,
                 system_prompt=system_prompt,
@@ -64,73 +60,26 @@ class ExcelHeaderFinderAgent:
         except Exception as e:
             logging.error(f"Erro ao comunicar com o AI ExcelHeaderFinderAgent: {e}")
             raise
-
-    def do_your_work_returning_row_content(self, excel_file_path: str) -> str:
-        """
-        Do the agent's work with the given parameters.
-
-        Args:
-            file_path (str): The file path to be used.
-
-        Returns:
-            str: The header row.
-        """
-        file_name = os.path.basename(excel_file_path)
-        excel_data_first_10_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=10)
-        return self.ask_ai(
-            excel_data_first_10_rows,
-            system_prompt=prompts.SYSTEM_PROMPT_ROW_CONTENT,
-            example_prompts=prompts.EXAMPLE_PROMPTS_ROW_CONTENT,
-            ai_analytics_file_name=file_name,
-        )
     
-    def do_your_work_returning_row_number(self, excel_file_path: str) -> int:
+    def do_your_work_returning_json(self, excel_file_path: str, ai_analytics_file_name: str = None) -> dict:
         """
         Do the agent's work with the given parameters.
 
         Args:
             file_path (str): The file path to be used.
-
-        Returns:
-            int: The number of the header row.
-        """
-        file_name = os.path.basename(excel_file_path)
-        excel_data_first_10_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=10)
-        excel_header_finder_agent_response = self.ask_ai(
-            excel_data_first_10_rows,
-            system_prompt=prompts.SYSTEM_PROMPT_ROW_NUMBER,
-            example_prompts=prompts.EXAMPLE_PROMPTS_ROW_NUMBER,
-            ai_analytics_file_name=file_name,
-        )
-
-        try:
-            excel_header_finder_agent_response_number = int(excel_header_finder_agent_response)
-        except ValueError:
-            excel_header_finder_agent_response_number = -1
-
-        if excel_header_finder_agent_response_number < 0:
-            logging.error(f"Warning - AI ExcelHeaderFinderAgent - Cabeçalho não encontrado nas primeiras 10 linhas do ficheiro {excel_file_path}. ai_agent_response: {excel_header_finder_agent_response}")
-
-        return excel_header_finder_agent_response_number
-    
-    def do_your_work_returning_json(self, excel_file_path: str) -> dict:
-        """
-        Do the agent's work with the given parameters.
-
-        Args:
-            file_path (str): The file path to be used.
+            ai_analytics_file_name (str): The AI analytics file name to be used.
 
         Returns:
             dict: The header row.
         """
         file_name = os.path.basename(excel_file_path)
-        excel_data_first_10_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=10)
+        excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         excel_header_finder_agent_response = self.ask_ai(
-            excel_data_first_10_rows,
+            excel_data_first_5_rows,
             system_prompt=prompts.SYSTEM_PROMPT_JSON,
             example_prompts=prompts.EXAMPLE_PROMPTS_JSON,
             response_format=self.ai_service.JSON_RESPONSE_FORMAT,
-            ai_analytics_file_name=file_name,
+            ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
         )
 
         try:
@@ -141,17 +90,18 @@ class ExcelHeaderFinderAgent:
         
         return excel_header_finder_agent_response_dict
 
-    def get_row_number(self, excel_file_path: str) -> int:
+    def get_row_number(self, excel_file_path: str, ai_analytics_file_name: str = None) -> int:
         """
         Get the row number of the header through AI JSON call.
 
         Args:
             file_path (str): The file path to be used.
+            ai_analytics_file_name (str): The AI analytics file name to be used.
 
         Returns:
             int: The number of the header row.
         """
-        excel_header_finder_agent_response = self.do_your_work_returning_json(excel_file_path)['row_number']
+        excel_header_finder_agent_response = self.do_your_work_returning_json(excel_file_path, ai_analytics_file_name)['row_number']
         try:
             excel_header_finder_agent_response_number = int(excel_header_finder_agent_response)
         except ValueError:
@@ -162,15 +112,16 @@ class ExcelHeaderFinderAgent:
 
         return excel_header_finder_agent_response_number
     
-    def get_row_content(self, excel_file_path: str) -> str:
+    def get_row_content(self, excel_file_path: str, ai_analytics_file_name: str = None) -> str:
         """
         Get the content of the header through AI JSON call.
 
         Args:
             file_path (str): The file path to be used.
+            ai_analytics_file_name (str): The AI analytics file name to be used.
 
         Returns:
             str: The header row.
         """
-        excel_header_finder_agent_response = self.do_your_work_returning_json(excel_file_path)['row_content']
+        excel_header_finder_agent_response = self.do_your_work_returning_json(excel_file_path, ai_analytics_file_name)['row_content']
         return excel_header_finder_agent_response if excel_header_finder_agent_response else ""

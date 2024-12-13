@@ -40,11 +40,7 @@ class ExcelPreHeaderModifierAgent:
             str: The AI's response.
         """
         try:
-            user_prompt = f"""
-```csv
-{excel_data}
-```
-            """
+            user_prompt = f"""{excel_data}"""
             ai_response = self.ai_service.ask_ai(
                 model=self.model,
                 system_prompt=system_prompt,
@@ -69,6 +65,7 @@ class ExcelPreHeaderModifierAgent:
         input_excel_file_path: str,
         header_row_number: int,
         output_excel_file_path: str,
+        ai_analytics_file_name: str = None,
     ) -> bool:
         """
         Do the agent's work with the given parameters.
@@ -78,6 +75,7 @@ class ExcelPreHeaderModifierAgent:
             input_excel_file_path (str): The path to the input Excel file.
             header_row_number (int): The number of the header row.
             output_excel_file_path (str): The path to the output Excel file.
+            ai_analytics_file_name (str): The AI analytics file name to be used.
 
         Returns:
             bool: The success of the operation.
@@ -89,8 +87,7 @@ class ExcelPreHeaderModifierAgent:
             system_prompt = prompts.SYSTEM_PROMPT_CATEGORY_TEST_EXECUTION
             example_prompts = prompts.EXAMPLE_PROMPTS_CATEGORY_TEST_EXECUTION
         else:
-            system_prompt = prompts.SYSTEM_PROMPT_TEST_ALL
-            example_prompts = prompts.EXAMPLE_PROMPTS_TEST_ALL
+            raise ValueError(f"AI ExcelPreHeaderModifierAgent - Invalid category: {category}")
 
         file_name = os.path.basename(input_excel_file_path)
         excel_data_first_rows_until_header = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path, only_get_first_rows=header_row_number)
@@ -99,7 +96,7 @@ class ExcelPreHeaderModifierAgent:
             excel_data=excel_data_first_rows_until_header,
             system_prompt=system_prompt,
             example_prompts=example_prompts,
-            ai_analytics_file_name=file_name,
+            ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
         )
 
         try:

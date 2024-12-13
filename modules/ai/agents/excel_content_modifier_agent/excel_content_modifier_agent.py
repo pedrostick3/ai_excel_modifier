@@ -41,12 +41,7 @@ class ExcelContentModifierAgent:
             str: The AI's response.
         """
         try:
-            user_prompt = f"""
-```csv
-{excel_data}
-```
-            """
-
+            user_prompt = f"""{excel_data}"""
             ai_response = self.ai_service.ask_ai(
                 model=self.model,
                 system_prompt=system_prompt,
@@ -71,7 +66,8 @@ class ExcelContentModifierAgent:
         input_excel_file_path: str,
         output_excel_file_path: str,
         excel_header: str,
-        max_excel_lines_per_ai_request: int = 20
+        max_excel_lines_per_ai_request: int = 20,
+        ai_analytics_file_name: str = None,
     ) -> None:
         """
         Processes an Excel file by splitting it into parts if it exceeds a specified number of lines,
@@ -83,6 +79,7 @@ class ExcelContentModifierAgent:
             excel_output_file_path (str): The path to the Excel file to be saved.
             excel_header (str): The header of the Excel file to be included in each part sent to the AI.
             max_excel_lines_per_ai_request (int, optional): The maximum number of lines to include in each part sent to the AI. Defaults to 20.
+            ai_analytics_file_name (str, optional): The AI analytics file name to be used. Defaults to None.
 
         Returns:
             None
@@ -94,8 +91,7 @@ class ExcelContentModifierAgent:
             system_prompt = prompts.SYSTEM_PROMPT_CATEGORY_TEST_EXECUTION
             example_prompts = prompts.EXAMPLE_PROMPTS_CATEGORY_TEST_EXECUTION
         else:
-            system_prompt = prompts.SYSTEM_PROMPT_TEST_ALL
-            example_prompts = prompts.EXAMPLE_PROMPTS_TEST_ALL
+            raise ValueError(f"AI ExcelContentModifierAgent: Invalid category: {category}")
 
         try:
             excel_data = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path)
@@ -114,8 +110,6 @@ class ExcelContentModifierAgent:
             parts = (excel_lines_count + max_excel_lines_per_ai_request - 1) // max_excel_lines_per_ai_request  # Ceiling division
             logging.info(f"AI ExcelContentModifierAgent: The file '{input_excel_file_path}' will be sent in {parts} parts to the AI.")
 
-            # TODO: Não enviar o pre-header na primeira parte (refazer system e example prompts)
-
             for i in range(parts):
                 start = i * max_excel_lines_per_ai_request
                 end = min((i + 1) * max_excel_lines_per_ai_request, excel_lines_count)
@@ -127,7 +121,12 @@ class ExcelContentModifierAgent:
                 logging.info(f"# ExcelContentModifierAgent # {i} ####################### {end - start} lines [{start}:{end}]. excel_to_send = {excel_to_send}")
 
                 try:
-                    agent_response = self.ask_ai(excel_to_send, system_prompt, example_prompts, file_name).strip() + excel_constants.EXCEL_LINE_BREAK
+                    agent_response = self.ask_ai(
+                        excel_data=excel_to_send,
+                        system_prompt=system_prompt,
+                        example_prompts=example_prompts,
+                        ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
+                    ).strip() + excel_constants.EXCEL_LINE_BREAK
                 except Exception as e:
                     logging.error(f"AI ExcelContentModifierAgent: Error communicating with AI: {e}")
                     raise
@@ -139,7 +138,12 @@ class ExcelContentModifierAgent:
                 excel_content_modifier_agent_response.append(agent_response)
         else:
             try:
-                excel_content_modifier_agent_response.append(self.ask_ai(excel_data, system_prompt, example_prompts, file_name))
+                excel_content_modifier_agent_response.append(self.ask_ai(
+                    excel_data=excel_data,
+                    system_prompt=system_prompt,
+                    example_prompts=example_prompts,
+                    ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
+                ))
             except Exception as e:
                 logging.error(f"AI ExcelContentModifierAgent: Error communicating with AI: {e}")
                 raise

@@ -56,3 +56,9 @@ print(f"######## Modelos disponíveis: {models}")
 - **tts-1** (created: 1681940951 (19/04/2023), owned by: openai-internal)
 - **tts-1-1106** (created: 1699053241 (03/11/2023), owned by: system)
 - **gpt-3.5-turbo-instruct-0914** (created: 1694122472 (07/09/2023), owned by: system)
+
+### Prompts utilizadas:
+- **ExcelCategorizerAgent**: modules/ai/agents/excel_categorizer_agent/excel_categorizer_agent_prompts.py
+- **ExcelHeaderFinderAgent**: modules/ai/agents/excel_header_finder_agent/excel_header_finder_agent_prompts.py
+- **ExcelPreHeaderModifierAgent**: modules/ai/agents/excel_pre_header_modifier_agent/excel_pre_header_modifier_agent_prompts.py
+- **ExcelContentModifierAgent**: modules/ai/agents/excel_content_modifier_agent/excel_content_modifier_agent_prompts.py
