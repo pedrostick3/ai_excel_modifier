@@ -1,53 +1,311 @@
-2024-12-18 12:31:42,508 - __main__ - INFO - A iniciar AI APP
-2024-12-18 12:31:42,802 - root - INFO - #### Start processing file: ./assets/docs_input\Execution_data Template.xlsx ####
-2024-12-18 12:31:42,802 - root - INFO - #1. START - ExcelCategorizerAgent
-2024-12-18 12:31:44,184 - root - INFO - Number of tokens in the messages: 885
-2024-12-18 12:31:44,185 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:44,185 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Execution_data Template.xlsx'\n```csv\n,,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n\n```\n"}]
-2024-12-18 12:31:44,186 - root - INFO - Wait for AI response...
-2024-12-18 12:31:45,386 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:45,395 - root - INFO - AI response received after 1.2065765857696533 seconds
-2024-12-18 12:31:45,395 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=781, total_tokens=788, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:45,395 - root - INFO - response message: {"category": "Execução"}
-2024-12-18 12:31:45,396 - root - INFO - AI ExcelCategorizerAgent: returned 'Execução' so the file 'Execution_data Template.xlsx' is the 'FileCategory.EXECUCAO' category.
-2024-12-18 12:31:45,396 - root - INFO - #1. END - ExcelCategorizerAgent
-2024-12-18 12:31:45,396 - root - INFO - #2. START - ExcelHeaderFinderAgent
-2024-12-18 12:31:45,489 - root - INFO - Number of tokens in the messages: 593
-2024-12-18 12:31:45,490 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:45,490 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n'}]
-2024-12-18 12:31:45,491 - root - INFO - Wait for AI response...
-2024-12-18 12:31:46,405 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:46,407 - root - INFO - AI response received after 0.915804386138916 seconds
-2024-12-18 12:31:46,407 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=540, total_tokens=591, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:31:46,407 - root - INFO - response message: {
+2024-12-18 16:44:17,913 - __main__ - INFO - A iniciar AI APP
+2024-12-18 16:44:18,224 - root - INFO - #### Start processing file: ./assets/docs_input\Execution_data Template.xlsx ####
+2024-12-18 16:44:18,225 - root - INFO - #1. START - ExcelCategorizerAgent
+2024-12-18 16:44:19,706 - root - INFO - Number of tokens in the messages: 885
+2024-12-18 16:44:19,706 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:19,707 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Execution_data Template.xlsx'\n```csv\n,,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n\n```\n"}]
+2024-12-18 16:44:19,708 - root - INFO - Wait for AI response...
+2024-12-18 16:44:20,805 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:20,815 - root - INFO - AI response received after 1.106947422027588 seconds
+2024-12-18 16:44:20,815 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=781, total_tokens=788, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:20,816 - root - INFO - response message: {"category": "Execução"}
+2024-12-18 16:44:20,816 - root - INFO - AI ExcelCategorizerAgent: returned 'Execução' so the file 'Execution_data Template.xlsx' is the 'FileCategory.EXECUCAO' category.
+2024-12-18 16:44:20,816 - root - INFO - #1. END - ExcelCategorizerAgent
+2024-12-18 16:44:20,817 - root - INFO - #2. START - ExcelHeaderFinderAgent
+2024-12-18 16:44:20,909 - root - INFO - Number of tokens in the messages: 593
+2024-12-18 16:44:20,909 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:20,909 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n'}]
+2024-12-18 16:44:20,911 - root - INFO - Wait for AI response...
+2024-12-18 16:44:21,799 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:21,801 - root - INFO - AI response received after 0.8900885581970215 seconds
+2024-12-18 16:44:21,801 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=540, total_tokens=591, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:21,801 - root - INFO - response message: {
     "row_number": "2",
     "row_content": "ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds"
 }
-2024-12-18 12:31:46,408 - root - INFO - #2. END - ExcelHeaderFinderAgent
-2024-12-18 12:31:46,408 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
-2024-12-18 12:31:46,622 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.EXECUCAO - excel_data_first_rows_until_header = ,,,,,,,,
+2024-12-18 16:44:21,801 - root - INFO - #2. END - ExcelHeaderFinderAgent
+2024-12-18 16:44:21,802 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
+2024-12-18 16:44:22,021 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.EXECUCAO - excel_data_first_rows_until_header = ,,,,,,,,
 ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
 
-2024-12-18 12:31:46,622 - root - INFO - Number of tokens in the messages: 225
-2024-12-18 12:31:46,623 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:46,624 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 1 if it is empty.\n2. Return the complete modified file with all rows and columns.\n3. Your response must not include code-blocks or MARKDOWN.\n4. You should not add extra commas.\n'}, {'role': 'user', 'content': ',,,,,,,,\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': 'ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n'}]
-2024-12-18 12:31:46,624 - root - INFO - Wait for AI response...
-2024-12-18 12:31:47,417 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:47,418 - root - INFO - AI response received after 0.7944886684417725 seconds
-2024-12-18 12:31:47,419 - root - INFO - response messages usage: CompletionUsage(completion_tokens=34, prompt_tokens=189, total_tokens=223, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:47,419 - root - INFO - response message: ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
-2024-12-18 12:31:47,726 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx
-2024-12-18 12:31:47,727 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
-2024-12-18 12:31:47,882 - root - INFO - #4. START - ExcelContentModifierAgent
-2024-12-18 12:31:48,054 - root - INFO - AI ExcelContentModifierAgent - FileCategory.EXECUCAO - The file './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx' has 494 lines.
-2024-12-18 12:31:48,055 - root - INFO - Number of tokens in the messages: 357
-2024-12-18 12:31:48,055 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
-2024-12-18 12:31:48,056 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.\n2. Remove the 'AverageRunTimeSeconds' column.\n3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'. Careful with the division and try to convert the values to numeric before dividing.\n4. Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Must have 5 decimal places.\n5. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.\n6. Return the python code to modify the complete file and save it.\n7. Your response must not include code-blocks or MARKDOWN.\n8. Initialize the given variables in the beginning of the code.\n9. Use concat() function to join dataframes.\n10. Don't use xlswriter to save the file.\n"}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
-2024-12-18 12:31:48,056 - root - INFO - Wait for AI response...
-2024-12-18 12:31:51,004 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:51,005 - root - INFO - AI response received after 2.9498305320739746 seconds
-2024-12-18 12:31:51,005 - root - INFO - response messages usage: CompletionUsage(completion_tokens=309, prompt_tokens=313, total_tokens=622, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:51,006 - root - INFO - response message: import pandas as pd
+2024-12-18 16:44:22,023 - root - INFO - Number of tokens in the messages: 225
+2024-12-18 16:44:22,023 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:22,023 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 1 if it is empty.\n2. Return the complete modified file with all rows and columns.\n3. Your response must not include code-blocks or MARKDOWN.\n4. You should not add extra commas.\n'}, {'role': 'user', 'content': ',,,,,,,,\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': 'ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n'}]
+2024-12-18 16:44:22,024 - root - INFO - Wait for AI response...
+2024-12-18 16:44:22,541 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:22,543 - root - INFO - AI response received after 0.5183701515197754 seconds
+2024-12-18 16:44:22,543 - root - INFO - response messages usage: CompletionUsage(completion_tokens=34, prompt_tokens=189, total_tokens=223, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:22,543 - root - INFO - response message: ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+2024-12-18 16:44:22,872 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx
+2024-12-18 16:44:22,873 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
+2024-12-18 16:44:23,045 - root - INFO - #4. START - ExcelContentModifierAgent
+2024-12-18 16:44:23,221 - root - INFO - AI ExcelContentModifierAgent - FileCategory.EXECUCAO - The file './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx' has 494 lines.
+2024-12-18 16:44:23,222 - root - INFO - Number of tokens in the messages: 314
+2024-12-18 16:44:23,222 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:44:23,222 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.\n2. Remove the 'AverageRunTimeSeconds' column.\n3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'. Careful with the division and try to convert the values to numeric before dividing.\n4. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.\n5. Return the python code to modify the complete file and save it.\n6. Your response must not include code-blocks or MARKDOWN.\n7. Initialize the given variables in the beginning of the code.\n8. Use concat() function to join dataframes.\n9. Don't use xlswriter to save the file."}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
+2024-12-18 16:44:23,223 - root - INFO - Wait for AI response...
+2024-12-18 16:44:25,889 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:25,891 - root - INFO - AI response received after 2.6679985523223877 seconds
+2024-12-18 16:44:25,891 - root - INFO - response messages usage: CompletionUsage(completion_tokens=332, prompt_tokens=272, total_tokens=604, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:25,891 - root - INFO - response message: import pandas as pd
+
+# Initialize the given variables
+input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+output_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+excel_header_row_index = 0
+
+# Load the Excel file
+data = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
+
+# 1. Move the 'IsSuccessful' column to column A
+columns = list(data.columns)
+columns.remove('IsSuccessful')
+columns = ['IsSuccessful'] + columns
+data = data[columns]
+
+# 2. Remove the 'AverageRunTimeSeconds' column
+if 'AverageRunTimeSeconds' in data.columns:
+    data = data.drop(columns=['AverageRunTimeSeconds'])
+
+# 3. Add a new column 'RunTimeMinutes'
+if 'RunTimeSeconds' in data.columns:
+    data['RunTimeMinutes'] = pd.to_numeric(data['RunTimeSeconds'], errors='coerce') / 60
+
+# 4. Change date-related columns to 'dd-MM-yyyy HH:mm:ss.mmm'
+date_columns = ['ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', 'CaseEndDate']
+for col in date_columns:
+    if col in data.columns:
+        data[col] = pd.to_datetime(data[col], errors='coerce').dt.strftime('%d-%m-%Y %H:%M:%S.%f').str[:-3]
+
+# Save the modified Excel file
+data.to_excel(output_excel_file_path, index=False)
+2024-12-18 16:44:26,274 - root - INFO - Number of tokens in the messages: 243
+2024-12-18 16:44:26,275 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:44:26,275 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. You must:\n1. Return the python code to modify the complete file and save it.\n2. Your response must not include code-blocks or MARKDOWN.\n3. Initialize the given variables in the beginning of the code.\n4. Use concat() function to join dataframes.\n5. Don't use xlswriter to save the file."}, {'role': 'user', 'content': "Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Make sure that every cell of 'TaskWorkload' column have 5 decimal places after the ','.\nVars:\ninput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
+2024-12-18 16:44:26,275 - root - INFO - Wait for AI response...
+2024-12-18 16:44:27,685 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:27,686 - root - INFO - AI response received after 1.4096641540527344 seconds
+2024-12-18 16:44:27,687 - root - INFO - response messages usage: CompletionUsage(completion_tokens=132, prompt_tokens=202, total_tokens=334, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:27,687 - root - INFO - response message: import pandas as pd
+
+input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+output_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+excel_header_row_index = 0
+
+data = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
+data['TaskWorkload'] = data['TaskWorkload'].apply(lambda x: f"{x:.5f}".replace('.', ','))
+data = pd.concat([data], axis=0)
+data.to_excel(output_excel_file_path, index=False)
+2024-12-18 16:44:28,123 - root - ERROR - Error adding pre-header data to the file: No columns to parse from file
+2024-12-18 16:44:28,123 - root - INFO - #4. END - ExcelContentModifierAgent
+2024-12-18 16:44:28,124 - root - INFO - #### Start processing file: ./assets/docs_input\ParameterizationFile_testes_13112024.xlsx ####
+2024-12-18 16:44:28,124 - root - INFO - #1. START - ExcelCategorizerAgent
+2024-12-18 16:44:28,143 - root - INFO - Number of tokens in the messages: 837
+2024-12-18 16:44:28,143 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:28,143 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': '\nFilename = \'ParameterizationFile_testes_13112024.xlsx\'\n```csv\nTemplate,Nome,Quota,Pivot,Sheet,NIF,Nsocio,SeparadorMilhar,SeparadorDecimal,Moeda,Remover linhas com,RemoverLinhaFinal,IgnorarLinhasSemValorDesconto,Taxa,MesReferencia\r\nAqueleGrande,Nome,Quota SAMS sócio,A1,Sheet1,Nº identif.fiscal,Número de sócio,",",.,,,,,,\r\nCA Coimbra,Nome ,Valor do Desconto,A3,Folha1,NIF,,,.,,,,,,\r\nCA Generico,NOME,QUOTA,A8,Mapa,,Nº SÓCIO SINDICATO,",",.,€,Total,Sim,,,\r\nComplicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,Sim,,\r\n\n```\n'}]
+2024-12-18 16:44:28,144 - root - INFO - Wait for AI response...
+2024-12-18 16:44:28,548 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:28,549 - root - INFO - AI response received after 0.4048945903778076 seconds
+2024-12-18 16:44:28,551 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=700, total_tokens=707, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:28,551 - root - INFO - response message: {"category": "INVALIDO"}
+2024-12-18 16:44:28,551 - root - INFO - AI ExcelCategorizerAgent: returned 'INVALIDO' so the file 'ParameterizationFile_testes_13112024.xlsx' is the 'FileCategory.INVALIDO' category.
+2024-12-18 16:44:28,551 - root - INFO - AI ExcelCategorizerAgent: O ficheiro 'ParameterizationFile_testes_13112024.xlsx' foi categorizado como 'INVALIDO'.
+2024-12-18 16:44:28,552 - root - INFO - AI ExcelCategorizerAgent: The file './assets/docs_input\ParameterizationFile_testes_13112024.xlsx' is 'FileCategory.INVALIDO'.
+2024-12-18 16:44:28,553 - root - INFO - #### Start processing file: ./assets/docs_input\Test_Execution_data Template.xlsx ####
+2024-12-18 16:44:28,553 - root - INFO - #1. START - ExcelCategorizerAgent
+2024-12-18 16:44:28,644 - root - INFO - Number of tokens in the messages: 773
+2024-12-18 16:44:28,644 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:28,645 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n\n```\n"}]
+2024-12-18 16:44:28,645 - root - INFO - Wait for AI response...
+2024-12-18 16:44:29,010 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:29,012 - root - INFO - AI response received after 0.36737561225891113 seconds
+2024-12-18 16:44:29,012 - root - INFO - response messages usage: CompletionUsage(completion_tokens=8, prompt_tokens=667, total_tokens=675, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:29,012 - root - INFO - response message: {"category": "Teste Execução"}
+2024-12-18 16:44:29,013 - root - INFO - AI ExcelCategorizerAgent: returned 'Teste Execução' so the file 'Test_Execution_data Template.xlsx' is the 'FileCategory.TESTE_EXECUCAO' category.
+2024-12-18 16:44:29,013 - root - INFO - #1. END - ExcelCategorizerAgent
+2024-12-18 16:44:29,013 - root - INFO - #2. START - ExcelHeaderFinderAgent
+2024-12-18 16:44:29,148 - root - INFO - Number of tokens in the messages: 479
+2024-12-18 16:44:29,148 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:29,148 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n'}]
+2024-12-18 16:44:29,149 - root - INFO - Wait for AI response...
+2024-12-18 16:44:29,876 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:29,877 - root - INFO - AI response received after 0.728663444519043 seconds
+2024-12-18 16:44:29,878 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=424, total_tokens=475, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:29,878 - root - INFO - response message: {
+    "row_number": "4",
+    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"
+}
+2024-12-18 16:44:29,878 - root - INFO - #2. END - ExcelHeaderFinderAgent
+2024-12-18 16:44:29,878 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
+2024-12-18 16:44:30,095 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.TESTE_EXECUCAO - excel_data_first_rows_until_header = Test execution date,2024-10-30 12:15:38.947,,,,,,,
+Total run time,3910,,,,,,,
+,,,,,,,,
+ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+
+2024-12-18 16:44:30,096 - root - INFO - Number of tokens in the messages: 340
+2024-12-18 16:44:30,096 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:44:30,096 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 3 if it is empty.\n2. Add a new blank row above row 1.\n3. Return the complete modified file with all rows and columns.\n4. Your response must not include code-blocks or MARKDOWN.\n5. You should not add extra commas.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': ',,,,,,,,\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n'}]
+2024-12-18 16:44:30,096 - root - INFO - Wait for AI response...
+2024-12-18 16:44:30,872 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:30,874 - root - INFO - AI response received after 0.7760422229766846 seconds
+2024-12-18 16:44:30,874 - root - INFO - response messages usage: CompletionUsage(completion_tokens=67, prompt_tokens=294, total_tokens=361, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:30,875 - root - INFO - response message: ,,,,,,,,
+Test execution date,2024-10-30 12:15:38.947,,,,,,,
+Total run time,3910,,,,,,,
+ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+2024-12-18 16:44:31,197 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
+2024-12-18 16:44:31,198 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
+2024-12-18 16:44:31,357 - root - INFO - #4. START - ExcelContentModifierAgent
+2024-12-18 16:44:31,490 - root - INFO - AI ExcelContentModifierAgent - FileCategory.TESTE_EXECUCAO - The file './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx' has 497 lines.
+2024-12-18 16:44:31,490 - root - INFO - Number of tokens in the messages: 288
+2024-12-18 16:44:31,491 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:44:31,491 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.\n2. Add the sum of 'RunTimeSeconds' and 'TaskWorkload' columns at the end of the table. Convert the values to numeric before calculating.\n3. Return the python code to modify the complete file and save it.\n4. Your response must not include code-blocks or MARKDOWN.\n5. Initialize the given variables in the beginning of the code.\n6. Use concat() function to join dataframes.\n7. Don't use xlswriter to save the file.\n8. Don't add unnecessary columns."}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\nexcel_header_row_index = 3"}]
+2024-12-18 16:44:31,492 - root - INFO - Wait for AI response...
+2024-12-18 16:44:33,893 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:44:33,895 - root - INFO - AI response received after 2.4034149646759033 seconds
+2024-12-18 16:44:33,895 - root - INFO - response messages usage: CompletionUsage(completion_tokens=239, prompt_tokens=246, total_tokens=485, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:44:33,896 - root - INFO - response message: import pandas as pd
+
+input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
+output_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
+excel_header_row_index = 3
+
+data = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
+columns_order = ['ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds']
+data = data[columns_order]
+
+data['RunTimeSeconds'] = pd.to_numeric(data['RunTimeSeconds'], errors='coerce')
+data['TaskWorkload'] = pd.to_numeric(data['TaskWorkload'], errors='coerce')
+
+sum_row = pd.DataFrame(data[['RunTimeSeconds', 'TaskWorkload']].sum().to_dict(), index=[0])
+data = pd.concat([data, sum_row], ignore_index=True)
+
+data.to_excel(output_excel_file_path, index=False, header=True)
+2024-12-18 16:44:34,265 - root - INFO - Number of tokens in the messages: 249
+2024-12-18 16:44:34,266 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:44:34,266 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. You must:\n1. Return the python code to modify the complete file and save it.\n2. Your response must not include code-blocks or MARKDOWN.\n3. Initialize the given variables in the beginning of the code.\n4. Use concat() function to join dataframes.\n5. Don't use xlswriter to save the file."}, {'role': 'user', 'content': "Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Make sure that every cell of 'TaskWorkload' column have 5 decimal places after the ','.\nVars:\ninput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
+2024-12-18 16:44:34,267 - root - INFO - Wait for AI response...
+2024-12-18 16:44:34,396 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 429 Too Many Requests"
+2024-12-18 16:44:34,397 - openai._base_client - INFO - Retrying request to /chat/completions in 46.000000 seconds
+2024-12-18 16:45:22,725 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:45:22,726 - root - INFO - AI response received after 48.45947456359863 seconds
+2024-12-18 16:45:22,727 - root - INFO - response messages usage: CompletionUsage(completion_tokens=147, prompt_tokens=208, total_tokens=355, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:45:22,727 - root - INFO - response message: import pandas as pd
+
+input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
+output_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
+excel_header_row_index = 0
+
+data = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
+data['TaskWorkload'] = data['TaskWorkload'].apply(lambda x: f"{x:,.5f}".replace('.', ','))
+dataframes = [data]
+final_data = pd.concat(dataframes, axis=0)
+final_data.to_excel(output_excel_file_path, index=False)
+2024-12-18 16:45:23,383 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
+2024-12-18 16:45:23,383 - root - INFO - #4. END - ExcelContentModifierAgent
+2024-12-18 16:45:23,383 - root - INFO - 
+#################################### AI Analytics ####################################
+
+##### Execution_data Template.xlsx - Demorou 6.593s.
+	ExcelCategorizerAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=781, completion_tokens=7, total_tokens=788) - Demorou 1.107s.
+	ExcelHeaderFinderAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=540, completion_tokens=51, total_tokens=591) - Demorou 0.890s.
+	ExcelPreHeaderModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=189, completion_tokens=34, total_tokens=223) - Demorou 0.518s.
+	ExcelContentModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=272, completion_tokens=332, total_tokens=604) - Demorou 2.668s.
+	ExcelGenericContentModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=202, completion_tokens=132, total_tokens=334) - Demorou 1.410s.
+##### ParameterizationFile_testes_13112024.xlsx - Demorou 0.405s.
+	ExcelCategorizerAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=700, completion_tokens=7, total_tokens=707) - Demorou 0.405s.
+##### Test_Execution_data Template.xlsx - Demorou 52.735s.
+	ExcelCategorizerAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=667, completion_tokens=8, total_tokens=675) - Demorou 0.367s.
+	ExcelHeaderFinderAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=424, completion_tokens=51, total_tokens=475) - Demorou 0.729s.
+	ExcelPreHeaderModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=294, completion_tokens=67, total_tokens=361) - Demorou 0.776s.
+	ExcelContentModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=246, completion_tokens=239, total_tokens=485) - Demorou 2.403s.
+	ExcelGenericContentModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=208, completion_tokens=147, total_tokens=355) - Demorou 48.459s.
+
+######################################################################################
+
+2024-12-18 16:48:46,294 - __main__ - INFO - A iniciar AI APP
+2024-12-18 16:48:46,563 - root - INFO - #### Start processing file: ./assets/docs_input\Execution_data Template.xlsx ####
+2024-12-18 16:48:46,563 - root - INFO - #1. START - ExcelCategorizerAgent
+2024-12-18 16:48:47,971 - root - INFO - Number of tokens in the messages: 885
+2024-12-18 16:48:47,971 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:48:47,971 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Execution_data Template.xlsx'\n```csv\n,,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n\n```\n"}]
+2024-12-18 16:48:47,973 - root - INFO - Wait for AI response...
+2024-12-18 16:48:50,024 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:50,035 - root - INFO - AI response received after 2.0618813037872314 seconds
+2024-12-18 16:48:50,035 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=781, total_tokens=788, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:48:50,035 - root - INFO - response message: {"category": "Execução"}
+2024-12-18 16:48:50,036 - root - INFO - AI ExcelCategorizerAgent: returned 'Execução' so the file 'Execution_data Template.xlsx' is the 'FileCategory.EXECUCAO' category.
+2024-12-18 16:48:50,036 - root - INFO - #1. END - ExcelCategorizerAgent
+2024-12-18 16:48:50,036 - root - INFO - #2. START - ExcelHeaderFinderAgent
+2024-12-18 16:48:50,128 - root - INFO - Number of tokens in the messages: 593
+2024-12-18 16:48:50,129 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:48:50,129 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n'}]
+2024-12-18 16:48:50,129 - root - INFO - Wait for AI response...
+2024-12-18 16:48:51,127 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:51,130 - root - INFO - AI response received after 0.9999620914459229 seconds
+2024-12-18 16:48:51,130 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=540, total_tokens=591, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:48:51,130 - root - INFO - response message: {
+    "row_number": "2",
+    "row_content": "ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds"
+}
+2024-12-18 16:48:51,131 - root - INFO - #2. END - ExcelHeaderFinderAgent
+2024-12-18 16:48:51,131 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
+2024-12-18 16:48:51,361 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.EXECUCAO - excel_data_first_rows_until_header = ,,,,,,,,
+ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+
+2024-12-18 16:48:51,362 - root - INFO - Number of tokens in the messages: 225
+2024-12-18 16:48:51,362 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:48:51,363 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 1 if it is empty.\n2. Return the complete modified file with all rows and columns.\n3. Your response must not include code-blocks or MARKDOWN.\n4. You should not add extra commas.\n'}, {'role': 'user', 'content': ',,,,,,,,\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': 'ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n'}]
+2024-12-18 16:48:51,363 - root - INFO - Wait for AI response...
+2024-12-18 16:48:52,018 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:52,019 - root - INFO - AI response received after 0.6562800407409668 seconds
+2024-12-18 16:48:52,019 - root - INFO - response messages usage: CompletionUsage(completion_tokens=34, prompt_tokens=189, total_tokens=223, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:48:52,019 - root - INFO - response message: ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+2024-12-18 16:48:52,341 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx
+2024-12-18 16:48:52,341 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
+2024-12-18 16:48:52,522 - root - INFO - #4. START - ExcelContentModifierAgent
+2024-12-18 16:48:52,703 - root - INFO - AI ExcelContentModifierAgent - FileCategory.EXECUCAO - The file './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx' has 494 lines.
+2024-12-18 16:48:52,704 - root - INFO - Number of tokens in the messages: 314
+2024-12-18 16:48:52,704 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:48:52,704 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.\n2. Remove the 'AverageRunTimeSeconds' column.\n3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'. Careful with the division and try to convert the values to numeric before dividing.\n4. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.\n5. Return the python code to modify the complete file and save it.\n6. Your response must not include code-blocks or MARKDOWN.\n7. Initialize the given variables in the beginning of the code.\n8. Use concat() function to join dataframes.\n9. Don't use xlswriter to save the file."}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
+2024-12-18 16:48:52,705 - root - INFO - Wait for AI response...
+2024-12-18 16:48:55,049 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:55,051 - root - INFO - AI response received after 2.3463973999023438 seconds
+2024-12-18 16:48:55,051 - root - INFO - response messages usage: CompletionUsage(completion_tokens=306, prompt_tokens=272, total_tokens=578, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:48:55,051 - root - INFO - response message: import pandas as pd
+
+input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+output_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+excel_header_row_index = 0
+
+# Load the Excel file
+df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
+
+# Step 1: Move 'IsSuccessful' column to column A
+is_successful = df.pop('IsSuccessful')
+df.insert(0, 'IsSuccessful', is_successful)
+
+# Step 2: Remove the 'AverageRunTimeSeconds' column
+df.drop(columns=['AverageRunTimeSeconds'], inplace=True)
+
+# Step 3: Add 'RunTimeMinutes' at the last position and set values to RunTimeSeconds / 60
+df['RunTimeMinutes'] = pd.to_numeric(df['RunTimeSeconds'], errors='coerce') / 60
+
+# Step 4: Change the format of specified date columns
+date_columns = ['ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', 'CaseEndDate']
+for column in date_columns:
+    df[column] = pd.to_datetime(df[column], errors='coerce').dt.strftime('%d-%m-%Y %H:%M:%S.%f')
+
+# Step 5: Save the modified DataFrame back to the Excel file
+df.to_excel(output_excel_file_path, index=False)
+2024-12-18 16:48:55,408 - root - INFO - Number of tokens in the messages: 243
+2024-12-18 16:48:55,408 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:48:55,408 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. You must:\n1. Return the python code to modify the complete file and save it.\n2. Your response must not include code-blocks or MARKDOWN.\n3. Initialize the given variables in the beginning of the code.\n4. Use concat() function to join dataframes.\n5. Don't use xlswriter to save the file."}, {'role': 'user', 'content': "Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Make sure that every cell of 'TaskWorkload' column have 5 decimal places after the ','.\nVars:\ninput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
+2024-12-18 16:48:55,409 - root - INFO - Wait for AI response...
+2024-12-18 16:48:57,186 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:57,188 - root - INFO - AI response received after 1.7789106369018555 seconds
+2024-12-18 16:48:57,188 - root - INFO - response messages usage: CompletionUsage(completion_tokens=156, prompt_tokens=202, total_tokens=358, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:48:57,188 - root - INFO - response message: import pandas as pd
 
 # Initialize variables
 input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
@@ -57,333 +315,167 @@ excel_header_row_index = 0
 # Read the Excel file
 df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
 
-# Move 'IsSuccessful' to column A
-is_successful = df.pop('IsSuccessful')
-df.insert(0, 'IsSuccessful', is_successful)
+# Modify the 'TaskWorkload' column
+df['TaskWorkload'] = df['TaskWorkload'].astype(float).map(lambda x: '{:,.5f}'.format(x).replace('.', ','))
 
-# Remove 'AverageRunTimeSeconds'
-df.drop(columns=['AverageRunTimeSeconds'], inplace=True)
-
-# Add 'RunTimeMinutes' column
-df['RunTimeMinutes'] = pd.to_numeric(df['RunTimeSeconds'], errors='coerce') / 60
-
-# Change 'TaskWorkload' format
-df['TaskWorkload'] = df['TaskWorkload'].apply(lambda x: f"{x:,.5f}".replace('.', ','))
-
-# Change the format of date columns
-date_columns = ['ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', 'CaseEndDate']
-for col in date_columns:
-    df[col] = pd.to_datetime(df[col]).dt.strftime('%d-%m-%Y %H:%M:%S.%f').str[:-3]
-
-# Save the modified DataFrame back to the Excel file
+# Save the modified DataFrame back to Excel
 df.to_excel(output_excel_file_path, index=False)
-2024-12-18 12:31:51,490 - root - ERROR - Error adding pre-header data to the file: No columns to parse from file
-2024-12-18 12:31:51,491 - root - INFO - #4. END - ExcelContentModifierAgent
-2024-12-18 12:31:51,491 - root - INFO - #### Start processing file: ./assets/docs_input\ParameterizationFile_testes_13112024.xlsx ####
-2024-12-18 12:31:51,491 - root - INFO - #1. START - ExcelCategorizerAgent
-2024-12-18 12:31:51,510 - root - INFO - Number of tokens in the messages: 837
-2024-12-18 12:31:51,510 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:51,511 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': '\nFilename = \'ParameterizationFile_testes_13112024.xlsx\'\n```csv\nTemplate,Nome,Quota,Pivot,Sheet,NIF,Nsocio,SeparadorMilhar,SeparadorDecimal,Moeda,Remover linhas com,RemoverLinhaFinal,IgnorarLinhasSemValorDesconto,Taxa,MesReferencia\r\nAqueleGrande,Nome,Quota SAMS sócio,A1,Sheet1,Nº identif.fiscal,Número de sócio,",",.,,,,,,\r\nCA Coimbra,Nome ,Valor do Desconto,A3,Folha1,NIF,,,.,,,,,,\r\nCA Generico,NOME,QUOTA,A8,Mapa,,Nº SÓCIO SINDICATO,",",.,€,Total,Sim,,,\r\nComplicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,Sim,,\r\n\n```\n'}]
-2024-12-18 12:31:51,512 - root - INFO - Wait for AI response...
-2024-12-18 12:31:52,082 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:52,084 - root - INFO - AI response received after 0.572021484375 seconds
-2024-12-18 12:31:52,084 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=700, total_tokens=707, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:52,085 - root - INFO - response message: {"category": "INVALIDO"}
-2024-12-18 12:31:52,085 - root - INFO - AI ExcelCategorizerAgent: returned 'INVALIDO' so the file 'ParameterizationFile_testes_13112024.xlsx' is the 'FileCategory.INVALIDO' category.
-2024-12-18 12:31:52,085 - root - INFO - AI ExcelCategorizerAgent: O ficheiro 'ParameterizationFile_testes_13112024.xlsx' foi categorizado como 'INVALIDO'.
-2024-12-18 12:31:52,087 - root - INFO - AI ExcelCategorizerAgent: The file './assets/docs_input\ParameterizationFile_testes_13112024.xlsx' is 'FileCategory.INVALIDO'.
-2024-12-18 12:31:52,087 - root - INFO - #### Start processing file: ./assets/docs_input\Test_Execution_data Template.xlsx ####
-2024-12-18 12:31:52,088 - root - INFO - #1. START - ExcelCategorizerAgent
-2024-12-18 12:31:52,178 - root - INFO - Number of tokens in the messages: 773
-2024-12-18 12:31:52,179 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:52,179 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n\n```\n"}]
-2024-12-18 12:31:52,180 - root - INFO - Wait for AI response...
-2024-12-18 12:31:53,233 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:53,235 - root - INFO - AI response received after 1.0555453300476074 seconds
-2024-12-18 12:31:53,236 - root - INFO - response messages usage: CompletionUsage(completion_tokens=8, prompt_tokens=667, total_tokens=675, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:53,236 - root - INFO - response message: {"category": "Teste Execução"}
-2024-12-18 12:31:53,236 - root - INFO - AI ExcelCategorizerAgent: returned 'Teste Execução' so the file 'Test_Execution_data Template.xlsx' is the 'FileCategory.TESTE_EXECUCAO' category.
-2024-12-18 12:31:53,238 - root - INFO - #1. END - ExcelCategorizerAgent
-2024-12-18 12:31:53,238 - root - INFO - #2. START - ExcelHeaderFinderAgent
-2024-12-18 12:31:53,327 - root - INFO - Number of tokens in the messages: 479
-2024-12-18 12:31:53,328 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:53,328 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n'}]
-2024-12-18 12:31:53,329 - root - INFO - Wait for AI response...
-2024-12-18 12:31:54,143 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:54,145 - root - INFO - AI response received after 0.8153228759765625 seconds
-2024-12-18 12:31:54,145 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=424, total_tokens=475, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:31:54,146 - root - INFO - response message: {
+2024-12-18 16:48:57,642 - root - ERROR - Error adding pre-header data to the file: No columns to parse from file
+2024-12-18 16:48:57,642 - root - INFO - #4. END - ExcelContentModifierAgent
+2024-12-18 16:48:57,642 - root - INFO - #### Start processing file: ./assets/docs_input\ParameterizationFile_testes_13112024.xlsx ####
+2024-12-18 16:48:57,644 - root - INFO - #1. START - ExcelCategorizerAgent
+2024-12-18 16:48:57,662 - root - INFO - Number of tokens in the messages: 837
+2024-12-18 16:48:57,663 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:48:57,663 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': '\nFilename = \'ParameterizationFile_testes_13112024.xlsx\'\n```csv\nTemplate,Nome,Quota,Pivot,Sheet,NIF,Nsocio,SeparadorMilhar,SeparadorDecimal,Moeda,Remover linhas com,RemoverLinhaFinal,IgnorarLinhasSemValorDesconto,Taxa,MesReferencia\r\nAqueleGrande,Nome,Quota SAMS sócio,A1,Sheet1,Nº identif.fiscal,Número de sócio,",",.,,,,,,\r\nCA Coimbra,Nome ,Valor do Desconto,A3,Folha1,NIF,,,.,,,,,,\r\nCA Generico,NOME,QUOTA,A8,Mapa,,Nº SÓCIO SINDICATO,",",.,€,Total,Sim,,,\r\nComplicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,Sim,,\r\n\n```\n'}]
+2024-12-18 16:48:57,664 - root - INFO - Wait for AI response...
+2024-12-18 16:48:58,081 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:58,083 - root - INFO - AI response received after 0.41877007484436035 seconds
+2024-12-18 16:48:58,083 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=700, total_tokens=707, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:48:58,083 - root - INFO - response message: {"category": "INVALIDO"}
+2024-12-18 16:48:58,083 - root - INFO - AI ExcelCategorizerAgent: returned 'INVALIDO' so the file 'ParameterizationFile_testes_13112024.xlsx' is the 'FileCategory.INVALIDO' category.
+2024-12-18 16:48:58,084 - root - INFO - AI ExcelCategorizerAgent: O ficheiro 'ParameterizationFile_testes_13112024.xlsx' foi categorizado como 'INVALIDO'.
+2024-12-18 16:48:58,086 - root - INFO - AI ExcelCategorizerAgent: The file './assets/docs_input\ParameterizationFile_testes_13112024.xlsx' is 'FileCategory.INVALIDO'.
+2024-12-18 16:48:58,086 - root - INFO - #### Start processing file: ./assets/docs_input\Test_Execution_data Template.xlsx ####
+2024-12-18 16:48:58,086 - root - INFO - #1. START - ExcelCategorizerAgent
+2024-12-18 16:48:58,178 - root - INFO - Number of tokens in the messages: 773
+2024-12-18 16:48:58,178 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:48:58,178 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n\n```\n"}]
+2024-12-18 16:48:58,179 - root - INFO - Wait for AI response...
+2024-12-18 16:48:59,354 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:48:59,356 - root - INFO - AI response received after 1.1767456531524658 seconds
+2024-12-18 16:48:59,356 - root - INFO - response messages usage: CompletionUsage(completion_tokens=8, prompt_tokens=667, total_tokens=675, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:48:59,356 - root - INFO - response message: {"category": "Teste Execução"}
+2024-12-18 16:48:59,356 - root - INFO - AI ExcelCategorizerAgent: returned 'Teste Execução' so the file 'Test_Execution_data Template.xlsx' is the 'FileCategory.TESTE_EXECUCAO' category.
+2024-12-18 16:48:59,358 - root - INFO - #1. END - ExcelCategorizerAgent
+2024-12-18 16:48:59,358 - root - INFO - #2. START - ExcelHeaderFinderAgent
+2024-12-18 16:48:59,492 - root - INFO - Number of tokens in the messages: 479
+2024-12-18 16:48:59,493 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:48:59,493 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n'}]
+2024-12-18 16:48:59,494 - root - INFO - Wait for AI response...
+2024-12-18 16:49:00,363 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:49:00,364 - root - INFO - AI response received after 0.8698327541351318 seconds
+2024-12-18 16:49:00,364 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=424, total_tokens=475, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
+2024-12-18 16:49:00,365 - root - INFO - response message: {
     "row_number": "4",
     "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"
 }
-2024-12-18 12:31:54,146 - root - INFO - #2. END - ExcelHeaderFinderAgent
-2024-12-18 12:31:54,147 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
-2024-12-18 12:31:54,394 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.TESTE_EXECUCAO - excel_data_first_rows_until_header = Test execution date,2024-10-30 12:15:38.947,,,,,,,
+2024-12-18 16:49:00,365 - root - INFO - #2. END - ExcelHeaderFinderAgent
+2024-12-18 16:49:00,365 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
+2024-12-18 16:49:00,588 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.TESTE_EXECUCAO - excel_data_first_rows_until_header = Test execution date,2024-10-30 12:15:38.947,,,,,,,
 Total run time,3910,,,,,,,
 ,,,,,,,,
 ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
 
-2024-12-18 12:31:54,396 - root - INFO - Number of tokens in the messages: 340
-2024-12-18 12:31:54,396 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:31:54,397 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 3 if it is empty.\n2. Add a new blank row above row 1.\n3. Return the complete modified file with all rows and columns.\n4. Your response must not include code-blocks or MARKDOWN.\n5. You should not add extra commas.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': ',,,,,,,,\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n'}]
-2024-12-18 12:31:54,397 - root - INFO - Wait for AI response...
-2024-12-18 12:31:55,473 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:55,475 - root - INFO - AI response received after 1.0781886577606201 seconds
-2024-12-18 12:31:55,475 - root - INFO - response messages usage: CompletionUsage(completion_tokens=67, prompt_tokens=294, total_tokens=361, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:55,476 - root - INFO - response message: ,,,,,,,,
+2024-12-18 16:49:00,589 - root - INFO - Number of tokens in the messages: 340
+2024-12-18 16:49:00,589 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
+2024-12-18 16:49:00,589 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 3 if it is empty.\n2. Add a new blank row above row 1.\n3. Return the complete modified file with all rows and columns.\n4. Your response must not include code-blocks or MARKDOWN.\n5. You should not add extra commas.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': ',,,,,,,,\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n'}]
+2024-12-18 16:49:00,590 - root - INFO - Wait for AI response...
+2024-12-18 16:49:01,851 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:49:01,853 - root - INFO - AI response received after 1.2635040283203125 seconds
+2024-12-18 16:49:01,853 - root - INFO - response messages usage: CompletionUsage(completion_tokens=67, prompt_tokens=294, total_tokens=361, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:49:01,853 - root - INFO - response message: ,,,,,,,,
 Test execution date,2024-10-30 12:15:38.947,,,,,,,
 Total run time,3910,,,,,,,
 ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
-2024-12-18 12:31:55,791 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
-2024-12-18 12:31:55,791 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
-2024-12-18 12:31:55,952 - root - INFO - #4. START - ExcelContentModifierAgent
-2024-12-18 12:31:56,084 - root - INFO - AI ExcelContentModifierAgent - FileCategory.TESTE_EXECUCAO - The file './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx' has 497 lines.
-2024-12-18 12:31:56,085 - root - INFO - Number of tokens in the messages: 335
-2024-12-18 12:31:56,085 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
-2024-12-18 12:31:56,085 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.\n2. Add the sum of 'RunTimeSeconds' and 'TaskWorkload' columns at the end of the table. Convert the values to numeric before calculating.\n3. Only after the sum, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Must have 5 decimal places.\n4. Return the python code to modify the complete file and save it.\n5. Your response must not include code-blocks or MARKDOWN.\n6. Initialize the given variables in the beginning of the code.\n7. Use concat() function to join dataframes.\n8. Don't use xlswriter to save the file.\n9. Don't add unnecessary columns."}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\nexcel_header_row_index = 3"}]
-2024-12-18 12:31:56,086 - root - INFO - Wait for AI response...
-2024-12-18 12:31:59,023 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:31:59,024 - root - INFO - AI response received after 2.9372992515563965 seconds
-2024-12-18 12:31:59,025 - root - INFO - response messages usage: CompletionUsage(completion_tokens=380, prompt_tokens=292, total_tokens=672, completion_tokens_details=None, prompt_tokens_details=None)
-2024-12-18 12:31:59,025 - root - INFO - response message: import pandas as pd
+2024-12-18 16:49:02,177 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
+2024-12-18 16:49:02,177 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
+2024-12-18 16:49:02,358 - root - INFO - #4. START - ExcelContentModifierAgent
+2024-12-18 16:49:02,495 - root - INFO - AI ExcelContentModifierAgent - FileCategory.TESTE_EXECUCAO - The file './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx' has 497 lines.
+2024-12-18 16:49:02,495 - root - INFO - Number of tokens in the messages: 288
+2024-12-18 16:49:02,495 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:49:02,496 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.\n2. Add the sum of 'RunTimeSeconds' and 'TaskWorkload' columns at the end of the table. Convert the values to numeric before calculating.\n3. Return the python code to modify the complete file and save it.\n4. Your response must not include code-blocks or MARKDOWN.\n5. Initialize the given variables in the beginning of the code.\n6. Use concat() function to join dataframes.\n7. Don't use xlswriter to save the file.\n8. Don't add unnecessary columns."}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\nexcel_header_row_index = 3"}]
+2024-12-18 16:49:02,496 - root - INFO - Wait for AI response...
+2024-12-18 16:49:08,009 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:49:08,011 - root - INFO - AI response received after 5.514587879180908 seconds
+2024-12-18 16:49:08,011 - root - INFO - response messages usage: CompletionUsage(completion_tokens=385, prompt_tokens=246, total_tokens=631, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:49:08,012 - root - INFO - response message: import pandas as pd
 
 input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
 output_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
 excel_header_row_index = 3
 
-# Read the data
+# Read the Excel file
 df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
 
 # Reorder the columns
-df = df[['ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds']]
+df = df[['ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 
+         'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 
+         'AverageRunTimeSeconds']]
 
-# Convert to numeric and calculate the sums
+# Convert columns to numeric
 df['RunTimeSeconds'] = pd.to_numeric(df['RunTimeSeconds'], errors='coerce')
 df['TaskWorkload'] = pd.to_numeric(df['TaskWorkload'], errors='coerce')
 
-sum_row = pd.DataFrame({'ExecutionId': ['Sum'],
-                        'ExecutionStartDate': [None],
-                        'ExecutionEndDate': [None],
-                        'TaskWorkload': [df['TaskWorkload'].sum()],
-                        'CaseStartDate': [None],
-                        'CaseEndDate': [None],
-                        'IsSuccessful': [None],
-                        'RunTimeSeconds': [df['RunTimeSeconds'].sum()],
-                        'AverageRunTimeSeconds': [None]})
+# Calculate the sum of 'RunTimeSeconds' and 'TaskWorkload'
+total_run_time_seconds = df['RunTimeSeconds'].sum()
+total_task_workload = df['TaskWorkload'].sum()
 
-# Append the sum row
-df = pd.concat([df, sum_row], ignore_index=True)
+# Create a new row for totals
+total_row = pd.DataFrame({
+    'ExecutionId': ['Total'],
+    'ExecutionStartDate': [''],
+    'ExecutionEndDate': [''],
+    'TaskWorkload': [total_task_workload],
+    'CaseStartDate': [''],
+    'CaseEndDate': [''],
+    'IsSuccessful': [''],
+    'RunTimeSeconds': [total_run_time_seconds],
+    'AverageRunTimeSeconds': ['']
+})
 
-# Change TaskWorkload format
-df['TaskWorkload'] = df['TaskWorkload'].apply(lambda x: f"{x:,.5f}" if pd.notnull(x) else x)
+# Append the total row to the DataFrame
+df = pd.concat([df, total_row], ignore_index=True)
 
-# Save the modified DataFrame to the same Excel file
+# Save the modified DataFrame back to the Excel file
 df.to_excel(output_excel_file_path, index=False)
-2024-12-18 12:31:59,711 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
-2024-12-18 12:31:59,711 - root - INFO - #4. END - ExcelContentModifierAgent
-2024-12-18 12:31:59,712 - root - INFO - 
-#################################### AI Analytics ####################################
-
-##### Execution_data Template.xlsx - Demorou 5.867s.
-	ExcelCategorizerAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=781, completion_tokens=7, total_tokens=788) - Demorou 1.207s.
-	ExcelHeaderFinderAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=540, completion_tokens=51, total_tokens=591) - Demorou 0.916s.
-	ExcelPreHeaderModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=189, completion_tokens=34, total_tokens=223) - Demorou 0.794s.
-	ExcelContentModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=313, completion_tokens=309, total_tokens=622) - Demorou 2.950s.
-##### ParameterizationFile_testes_13112024.xlsx - Demorou 0.572s.
-	ExcelCategorizerAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=700, completion_tokens=7, total_tokens=707) - Demorou 0.572s.
-##### Test_Execution_data Template.xlsx - Demorou 5.886s.
-	ExcelCategorizerAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=667, completion_tokens=8, total_tokens=675) - Demorou 1.056s.
-	ExcelHeaderFinderAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=424, completion_tokens=51, total_tokens=475) - Demorou 0.815s.
-	ExcelPreHeaderModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=294, completion_tokens=67, total_tokens=361) - Demorou 1.078s.
-	ExcelContentModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=292, completion_tokens=380, total_tokens=672) - Demorou 2.937s.
-
-######################################################################################
-
-2024-12-18 12:32:57,972 - __main__ - INFO - A iniciar AI APP
-2024-12-18 12:32:58,241 - root - INFO - #### Start processing file: ./assets/docs_input\Execution_data Template.xlsx ####
-2024-12-18 12:32:58,241 - root - INFO - #1. START - ExcelCategorizerAgent
-2024-12-18 12:32:59,522 - root - INFO - Number of tokens in the messages: 885
-2024-12-18 12:32:59,522 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:32:59,523 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Execution_data Template.xlsx'\n```csv\n,,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n\n```\n"}]
-2024-12-18 12:32:59,524 - root - INFO - Wait for AI response...
-2024-12-18 12:33:00,430 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:00,437 - root - INFO - AI response received after 0.9129223823547363 seconds
-2024-12-18 12:33:00,438 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=781, total_tokens=788, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:00,438 - root - INFO - response message: {"category": "Execução"}
-2024-12-18 12:33:00,439 - root - INFO - AI ExcelCategorizerAgent: returned 'Execução' so the file 'Execution_data Template.xlsx' is the 'FileCategory.EXECUCAO' category.
-2024-12-18 12:33:00,439 - root - INFO - #1. END - ExcelCategorizerAgent
-2024-12-18 12:33:00,439 - root - INFO - #2. START - ExcelHeaderFinderAgent
-2024-12-18 12:33:00,528 - root - INFO - Number of tokens in the messages: 593
-2024-12-18 12:33:00,528 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:33:00,528 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146\r\n153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33\r\n'}]
-2024-12-18 12:33:00,529 - root - INFO - Wait for AI response...
-2024-12-18 12:33:01,473 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:01,475 - root - INFO - AI response received after 0.9452559947967529 seconds
-2024-12-18 12:33:01,475 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=540, total_tokens=591, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:01,476 - root - INFO - response message: {
-    "row_number": "2",
-    "row_content": "ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds"
-}
-2024-12-18 12:33:01,476 - root - INFO - #2. END - ExcelHeaderFinderAgent
-2024-12-18 12:33:01,477 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
-2024-12-18 12:33:01,691 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.EXECUCAO - excel_data_first_rows_until_header = ,,,,,,,,
-ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
-
-2024-12-18 12:33:01,691 - root - INFO - Number of tokens in the messages: 225
-2024-12-18 12:33:01,691 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:33:01,692 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 1 if it is empty.\n2. Return the complete modified file with all rows and columns.\n3. Your response must not include code-blocks or MARKDOWN.\n4. You should not add extra commas.\n'}, {'role': 'user', 'content': ',,,,,,,,\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': 'ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds'}, {'role': 'user', 'content': ',,,,,,,,\r\nExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds\r\n'}]
-2024-12-18 12:33:01,692 - root - INFO - Wait for AI response...
-2024-12-18 12:33:02,246 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:02,249 - root - INFO - AI response received after 0.5558140277862549 seconds
-2024-12-18 12:33:02,249 - root - INFO - response messages usage: CompletionUsage(completion_tokens=34, prompt_tokens=189, total_tokens=223, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:02,249 - root - INFO - response message: ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
-2024-12-18 12:33:02,573 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx
-2024-12-18 12:33:02,574 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
-2024-12-18 12:33:02,728 - root - INFO - #4. START - ExcelContentModifierAgent
-2024-12-18 12:33:02,901 - root - INFO - AI ExcelContentModifierAgent - FileCategory.EXECUCAO - The file './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx' has 494 lines.
-2024-12-18 12:33:02,902 - root - INFO - Number of tokens in the messages: 357
-2024-12-18 12:33:02,903 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
-2024-12-18 12:33:02,903 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.\n2. Remove the 'AverageRunTimeSeconds' column.\n3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'. Careful with the division and try to convert the values to numeric before dividing.\n4. Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Must have 5 decimal places.\n5. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.\n6. Return the python code to modify the complete file and save it.\n7. Your response must not include code-blocks or MARKDOWN.\n8. Initialize the given variables in the beginning of the code.\n9. Use concat() function to join dataframes.\n10. Don't use xlswriter to save the file.\n"}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
-2024-12-18 12:33:02,904 - root - INFO - Wait for AI response...
-2024-12-18 12:33:06,955 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:06,957 - root - INFO - AI response received after 4.053664684295654 seconds
-2024-12-18 12:33:06,958 - root - INFO - response messages usage: CompletionUsage(completion_tokens=400, prompt_tokens=313, total_tokens=713, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:06,958 - root - INFO - response message: import pandas as pd
+2024-12-18 16:49:08,356 - root - INFO - Number of tokens in the messages: 249
+2024-12-18 16:49:08,356 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
+2024-12-18 16:49:08,356 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. You must:\n1. Return the python code to modify the complete file and save it.\n2. Your response must not include code-blocks or MARKDOWN.\n3. Initialize the given variables in the beginning of the code.\n4. Use concat() function to join dataframes.\n5. Don't use xlswriter to save the file."}, {'role': 'user', 'content': "Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Make sure that every cell of 'TaskWorkload' column have 5 decimal places after the ','.\nVars:\ninput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\nexcel_header_row_index = 0"}]
+2024-12-18 16:49:08,357 - root - INFO - Wait for AI response...
+2024-12-18 16:49:10,399 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
+2024-12-18 16:49:10,401 - root - INFO - AI response received after 2.0433340072631836 seconds
+2024-12-18 16:49:10,401 - root - INFO - response messages usage: CompletionUsage(completion_tokens=201, prompt_tokens=208, total_tokens=409, completion_tokens_details=None, prompt_tokens_details=None)
+2024-12-18 16:49:10,401 - root - INFO - response message: import pandas as pd
 
 # Initialize variables
-input_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
-output_excel_file_path = './assets/docs_output/Execução - 18_12_2024 - Execution_data Template.xlsx'
+input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
+output_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
 excel_header_row_index = 0
 
 # Load the Excel file
 df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
 
-# Move the 'IsSuccessful' column to column A
-is_successful_col = df['IsSuccessful']
-df = df.drop(columns=['IsSuccessful'])
-df = pd.concat([is_successful_col, df], axis=1)
+# Function to format the TaskWorkload column
+def format_task_workload(value):
+    if pd.isna(value):
+        return value
+    formatted_value = '{:,.5f}'.format(value).replace('.', ',')
+    return formatted_value
 
-# Remove the 'AverageRunTimeSeconds' column
-df = df.drop(columns=['AverageRunTimeSeconds'])
+# Apply the formatting to the 'TaskWorkload' column
+df['TaskWorkload'] = df['TaskWorkload'].apply(format_task_workload)
 
-# Add 'RunTimeMinutes' column and set values to 'RunTimeSeconds/60'
-df['RunTimeSeconds'] = pd.to_numeric(df['RunTimeSeconds'], errors='coerce')  # Convert to numeric
-df['RunTimeMinutes'] = df['RunTimeSeconds'] / 60  # Perform division
-
-# Replace '.' with ',' in the 'TaskWorkload' column and format to 5 decimal places
-df['TaskWorkload'] = df['TaskWorkload'].apply(lambda x: f"{str(x).replace('.', ','):.5}")
-
-# Change the format of specific date columns
-date_columns = ['ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', 'CaseEndDate']
-for col in date_columns:
-    df[col] = pd.to_datetime(df[col], errors='coerce')  # Convert to date format
-    df[col] = df[col].dt.strftime('%d-%m-%Y %H:%M:%S.%f').str[:-3]  # Format to 'dd-MM-yyyy HH:mm:ss.mmm'
-
-# Save the modified Excel file
+# Save the updated DataFrame back to Excel
 df.to_excel(output_excel_file_path, index=False)
-2024-12-18 12:33:07,448 - root - ERROR - Error adding pre-header data to the file: No columns to parse from file
-2024-12-18 12:33:07,449 - root - INFO - #4. END - ExcelContentModifierAgent
-2024-12-18 12:33:07,449 - root - INFO - #### Start processing file: ./assets/docs_input\ParameterizationFile_testes_13112024.xlsx ####
-2024-12-18 12:33:07,449 - root - INFO - #1. START - ExcelCategorizerAgent
-2024-12-18 12:33:07,467 - root - INFO - Number of tokens in the messages: 837
-2024-12-18 12:33:07,467 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:33:07,468 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': '\nFilename = \'ParameterizationFile_testes_13112024.xlsx\'\n```csv\nTemplate,Nome,Quota,Pivot,Sheet,NIF,Nsocio,SeparadorMilhar,SeparadorDecimal,Moeda,Remover linhas com,RemoverLinhaFinal,IgnorarLinhasSemValorDesconto,Taxa,MesReferencia\r\nAqueleGrande,Nome,Quota SAMS sócio,A1,Sheet1,Nº identif.fiscal,Número de sócio,",",.,,,,,,\r\nCA Coimbra,Nome ,Valor do Desconto,A3,Folha1,NIF,,,.,,,,,,\r\nCA Generico,NOME,QUOTA,A8,Mapa,,Nº SÓCIO SINDICATO,",",.,€,Total,Sim,,,\r\nComplicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,Sim,,\r\n\n```\n'}]
-2024-12-18 12:33:07,469 - root - INFO - Wait for AI response...
-2024-12-18 12:33:07,931 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:07,933 - root - INFO - AI response received after 0.4639887809753418 seconds
-2024-12-18 12:33:07,933 - root - INFO - response messages usage: CompletionUsage(completion_tokens=7, prompt_tokens=700, total_tokens=707, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:07,933 - root - INFO - response message: {"category": "INVALIDO"}
-2024-12-18 12:33:07,934 - root - INFO - AI ExcelCategorizerAgent: returned 'INVALIDO' so the file 'ParameterizationFile_testes_13112024.xlsx' is the 'FileCategory.INVALIDO' category.
-2024-12-18 12:33:07,934 - root - INFO - AI ExcelCategorizerAgent: O ficheiro 'ParameterizationFile_testes_13112024.xlsx' foi categorizado como 'INVALIDO'.
-2024-12-18 12:33:07,936 - root - INFO - AI ExcelCategorizerAgent: The file './assets/docs_input\ParameterizationFile_testes_13112024.xlsx' is 'FileCategory.INVALIDO'.
-2024-12-18 12:33:07,937 - root - INFO - #### Start processing file: ./assets/docs_input\Test_Execution_data Template.xlsx ####
-2024-12-18 12:33:07,937 - root - INFO - #1. START - ExcelCategorizerAgent
-2024-12-18 12:33:08,027 - root - INFO - Number of tokens in the messages: 773
-2024-12-18 12:33:08,027 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:33:08,028 - root - INFO - request messages: [{'role': 'system', 'content': 'You are an assistant for categorizing Excel files.\nYour task is to return only the category name of the file.\n1. Name categorization:\n1.1. If the filename contains \'Execution_data\', then it belongs to the \'Execução\' category and ignore the rest of the rules;\n1.2. If the filename contains \'Test_Execution_data\', then it belongs to the \'Teste Execução\' category and ignore the rest of the rules;\n1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;\n2. Content categorization:\n2.1. If the file has a blank first line and then the columns \'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds\', then category is \'Execução\'.\n2.2. If the file has in column A line 1 the label \'Test execution\', in column A line 2 the label \'Total run time\' and in list 4 the columns \'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds\', then category is \'Teste Execução\'.\n2.3. If the file does not comply with the indicated cases, then category is \'INVALIDO\'.\nYour response should only include one JSON with the following format:\n{\n    "category": <category_name>\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\n```\n"}, {'role': 'assistant', 'content': '{"category": "Teste Execução"}'}, {'role': 'user', 'content': "\nFilename = 'Test_Execution_data Template.xlsx'\n```csv\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n\n```\n"}]
-2024-12-18 12:33:08,029 - root - INFO - Wait for AI response...
-2024-12-18 12:33:08,406 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:08,408 - root - INFO - AI response received after 0.37990355491638184 seconds
-2024-12-18 12:33:08,408 - root - INFO - response messages usage: CompletionUsage(completion_tokens=8, prompt_tokens=667, total_tokens=675, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:08,409 - root - INFO - response message: {"category": "Teste Execução"}
-2024-12-18 12:33:08,409 - root - INFO - AI ExcelCategorizerAgent: returned 'Teste Execução' so the file 'Test_Execution_data Template.xlsx' is the 'FileCategory.TESTE_EXECUCAO' category.
-2024-12-18 12:33:08,409 - root - INFO - #1. END - ExcelCategorizerAgent
-2024-12-18 12:33:08,410 - root - INFO - #2. START - ExcelHeaderFinderAgent
-2024-12-18 12:33:08,499 - root - INFO - Number of tokens in the messages: 479
-2024-12-18 12:33:08,501 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:33:08,501 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for analyzing Excel files.\nYou need to identify where the table starts by finding the row with the column names.\nYour response should only include one JSON with the following format:\n{\n    "row_number": "<row_number>",\n    "row_content": "<row_content>"\n}\nNo code-blocks or MARKDOWN are allowed in the response.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20'}, {'role': 'assistant', 'content': '\n{\n    "row_number": "4",\n    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"\n}\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20\r\n'}]
-2024-12-18 12:33:08,501 - root - INFO - Wait for AI response...
-2024-12-18 12:33:09,229 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:09,231 - root - INFO - AI response received after 0.7283637523651123 seconds
-2024-12-18 12:33:09,231 - root - INFO - response messages usage: CompletionUsage(completion_tokens=51, prompt_tokens=424, total_tokens=475, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:09,232 - root - INFO - response message: {
-    "row_number": "4",
-    "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"
-}
-2024-12-18 12:33:09,232 - root - INFO - #2. END - ExcelHeaderFinderAgent
-2024-12-18 12:33:09,232 - root - INFO - #3. START - ExcelPreHeaderModifierAgent
-2024-12-18 12:33:09,499 - root - INFO - AI ExcelPreHeaderModifierAgent - FileCategory.TESTE_EXECUCAO - excel_data_first_rows_until_header = Test execution date,2024-10-30 12:15:38.947,,,,,,,
-Total run time,3910,,,,,,,
-,,,,,,,,
-ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
-
-2024-12-18 12:33:09,501 - root - INFO - Number of tokens in the messages: 340
-2024-12-18 12:33:09,501 - root - INFO - Exists 4 messages in the conversation, with the following roles: system, user, assistant, user.
-2024-12-18 12:33:09,502 - root - INFO - request messages: [{'role': 'system', 'content': '\nYou are an assistant for editing Excel files. Your tasks are:\n1. Remove row 3 if it is empty.\n2. Add a new blank row above row 1.\n3. Return the complete modified file with all rows and columns.\n4. Your response must not include code-blocks or MARKDOWN.\n5. You should not add extra commas.\n'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\n,,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'assistant', 'content': ',,,,,,,,\nTest execution date,2024-10-30 12:15:38.947,,,,,,,\nTotal run time,3910,,,,,,,\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds'}, {'role': 'user', 'content': 'Test execution date,2024-10-30 12:15:38.947,,,,,,,\r\nTotal run time,3910,,,,,,,\r\n,,,,,,,,\r\nExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds\r\n'}]
-2024-12-18 12:33:09,502 - root - INFO - Wait for AI response...
-2024-12-18 12:33:10,322 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:10,324 - root - INFO - AI response received after 0.8214845657348633 seconds
-2024-12-18 12:33:10,324 - root - INFO - response messages usage: CompletionUsage(completion_tokens=67, prompt_tokens=294, total_tokens=361, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:10,325 - root - INFO - response message: ,,,,,,,,
-Test execution date,2024-10-30 12:15:38.947,,,,,,,
-Total run time,3910,,,,,,,
-ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
-2024-12-18 12:33:10,616 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
-2024-12-18 12:33:10,617 - root - INFO - #3. END - ExcelPreHeaderModifierAgent
-2024-12-18 12:33:10,770 - root - INFO - #4. START - ExcelContentModifierAgent
-2024-12-18 12:33:10,901 - root - INFO - AI ExcelContentModifierAgent - FileCategory.TESTE_EXECUCAO - The file './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx' has 497 lines.
-2024-12-18 12:33:10,903 - root - INFO - Number of tokens in the messages: 335
-2024-12-18 12:33:10,903 - root - INFO - Exists 2 messages in the conversation, with the following roles: system, user.
-2024-12-18 12:33:10,903 - root - INFO - request messages: [{'role': 'system', 'content': "You are an assistant for editing Excel files. Your tasks are:\n1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.\n2. Add the sum of 'RunTimeSeconds' and 'TaskWorkload' columns at the end of the table. Convert the values to numeric before calculating.\n3. Only after the sum, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Must have 5 decimal places.\n4. Return the python code to modify the complete file and save it.\n5. Your response must not include code-blocks or MARKDOWN.\n6. Initialize the given variables in the beginning of the code.\n7. Use concat() function to join dataframes.\n8. Don't use xlswriter to save the file.\n9. Don't add unnecessary columns."}, {'role': 'user', 'content': "input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\noutput_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'\nexcel_header_row_index = 3"}]
-2024-12-18 12:33:10,904 - root - INFO - Wait for AI response...
-2024-12-18 12:33:13,956 - httpx - INFO - HTTP Request: POST https://models.inference.ai.azure.com/chat/completions "HTTP/1.1 200 OK"
-2024-12-18 12:33:13,958 - root - INFO - AI response received after 3.0540575981140137 seconds
-2024-12-18 12:33:13,959 - root - INFO - response messages usage: CompletionUsage(completion_tokens=263, prompt_tokens=292, total_tokens=555, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=0, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))
-2024-12-18 12:33:13,959 - root - INFO - response message: import pandas as pd
-
-input_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
-output_excel_file_path = './assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx'
-excel_header_row_index = 3
-
-df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
-df = df[['ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds']]
-
-df['RunTimeSeconds'] = pd.to_numeric(df['RunTimeSeconds'], errors='coerce')
-df['TaskWorkload'] = pd.to_numeric(df['TaskWorkload'], errors='coerce')
-
-sum_row = pd.DataFrame(df[['RunTimeSeconds', 'TaskWorkload']].sum()).T
-df = pd.concat([df, sum_row], ignore_index=True)
-
-df['TaskWorkload'] = df['TaskWorkload'].apply(lambda x: f"{x:,.5f}".replace('.', ',') if pd.notnull(x) else x)
-
-df.to_excel(output_excel_file_path, index=False)
-2024-12-18 12:33:14,639 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
-2024-12-18 12:33:14,639 - root - INFO - #4. END - ExcelContentModifierAgent
-2024-12-18 12:33:14,640 - root - INFO - 
+2024-12-18 16:49:11,114 - root - INFO - File successfully saved as Excel at: ./assets/docs_output/Teste Execução - 18_12_2024 - Test_Execution_data Template.xlsx
+2024-12-18 16:49:11,114 - root - INFO - #4. END - ExcelContentModifierAgent
+2024-12-18 16:49:11,115 - root - INFO - 
 #################################### AI Analytics ####################################
 
-##### Execution_data Template.xlsx - Demorou 6.468s.
-	ExcelCategorizerAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=781, completion_tokens=7, total_tokens=788) - Demorou 0.913s.
-	ExcelHeaderFinderAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=540, completion_tokens=51, total_tokens=591) - Demorou 0.945s.
-	ExcelPreHeaderModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=189, completion_tokens=34, total_tokens=223) - Demorou 0.556s.
-	ExcelContentModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=313, completion_tokens=400, total_tokens=713) - Demorou 4.054s.
-##### ParameterizationFile_testes_13112024.xlsx - Demorou 0.464s.
-	ExcelCategorizerAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=700, completion_tokens=7, total_tokens=707) - Demorou 0.464s.
-##### Test_Execution_data Template.xlsx - Demorou 4.984s.
-	ExcelCategorizerAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=667, completion_tokens=8, total_tokens=675) - Demorou 0.380s.
-	ExcelHeaderFinderAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=424, completion_tokens=51, total_tokens=475) - Demorou 0.728s.
-	ExcelPreHeaderModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=294, completion_tokens=67, total_tokens=361) - Demorou 0.821s.
-	ExcelContentModifierAgent - ai_model=gpt-4o CompletionUsage(prompt_tokens=292, completion_tokens=263, total_tokens=555) - Demorou 3.054s.
+##### Execution_data Template.xlsx - Demorou 7.843s.
+	ExcelCategorizerAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=781, completion_tokens=7, total_tokens=788) - Demorou 2.062s.
+	ExcelHeaderFinderAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=540, completion_tokens=51, total_tokens=591) - Demorou 1.000s.
+	ExcelPreHeaderModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=189, completion_tokens=34, total_tokens=223) - Demorou 0.656s.
+	ExcelContentModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=272, completion_tokens=306, total_tokens=578) - Demorou 2.346s.
+	ExcelGenericContentModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=202, completion_tokens=156, total_tokens=358) - Demorou 1.779s.
+##### ParameterizationFile_testes_13112024.xlsx - Demorou 0.419s.
+	ExcelCategorizerAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=700, completion_tokens=7, total_tokens=707) - Demorou 0.419s.
+##### Test_Execution_data Template.xlsx - Demorou 10.868s.
+	ExcelCategorizerAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=667, completion_tokens=8, total_tokens=675) - Demorou 1.177s.
+	ExcelHeaderFinderAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=424, completion_tokens=51, total_tokens=475) - Demorou 0.870s.
+	ExcelPreHeaderModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=294, completion_tokens=67, total_tokens=361) - Demorou 1.264s.
+	ExcelContentModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=246, completion_tokens=385, total_tokens=631) - Demorou 5.515s.
+	ExcelGenericContentModifierAgent - ai_model=gpt-4o-mini CompletionUsage(prompt_tokens=208, completion_tokens=201, total_tokens=409) - Demorou 2.043s.
 
 ######################################################################################
 

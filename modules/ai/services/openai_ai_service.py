@@ -27,6 +27,7 @@ class OpenAiAiService(AiService):
         use_assistant_instead_of_system: bool = False,
         response_format: None | dict = {"type": "json_object"},
         temperature: float = 1,
+        top_p: float = 1,
         ai_analytics_file_name: str = None,
         ai_analytics_agent_name: str = None,
         log_request_messages: bool = True,
@@ -44,6 +45,7 @@ class OpenAiAiService(AiService):
             use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system.
             response_format (None | dict): The response format to be used.
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
+            top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
             ai_analytics_file_name (str): The AI analytics file name to be used.
             ai_analytics_agent_name (str): The AI analytics agent name to be used.
             log_request_messages (bool): Flag to indicate if the request messages should be logged.
@@ -82,6 +84,7 @@ class OpenAiAiService(AiService):
                 messages=self.followup_conversation_messages,
                 response_format=response_format,
                 temperature=temperature,
+                top_p=top_p,
             )
             execution_time = time.time() - start_time
             logging.info(f"AI response received after {execution_time} seconds")

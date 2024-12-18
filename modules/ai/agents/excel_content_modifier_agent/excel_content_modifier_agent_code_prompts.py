@@ -2,13 +2,14 @@ SYSTEM_CODE_PROMPT_CATEGORY_EXECUTION = """You are an assistant for editing Exce
 1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.
 2. Remove the 'AverageRunTimeSeconds' column.
 3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'. Careful with the division and try to convert the values to numeric before dividing.
-4. Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Every cell of 'TaskWorkload' column must have 5 decimal places after the ','.
-5. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.
-6. Return the python code to modify the complete file and save it.
-7. Your response must not include code-blocks or MARKDOWN.
-8. Initialize the given variables in the beginning of the code.
-9. Use concat() function to join dataframes.
-10. Don't use xlswriter to save the file."""
+4. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.
+5. Return the python code to modify the complete file and save it.
+6. Your response must not include code-blocks or MARKDOWN.
+7. Initialize the given variables in the beginning of the code.
+8. Use concat() function to join dataframes.
+9. Don't use xlswriter to save the file."""
+# AI don't have a consistent behavior for this task. This task was seperated from this ExcelContentModifierAgent prompt and it's being handled as a specific case by the ExcelGenericContentModifierAgent.
+#5. In the end, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Make sure that every cell of 'TaskWorkload' column have 5 decimal places after the ','.
 
 EXAMPLE_CODE_PROMPTS_CATEGORY_EXECUTION = [
     {
@@ -26,13 +27,14 @@ excel_header_row_index = 1""",
 SYSTEM_CODE_PROMPT_CATEGORY_TEST_EXECUTION = """You are an assistant for editing Excel files. Your tasks are:
 1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.
 2. Add the sum of 'RunTimeSeconds' and 'TaskWorkload' columns at the end of the table. Convert the values to numeric before calculating.
-3. Only after the sum, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Every cell of 'TaskWorkload' column must have 5 decimal places after the ','.
-4. Return the python code to modify the complete file and save it.
-5. Your response must not include code-blocks or MARKDOWN.
-6. Initialize the given variables in the beginning of the code.
-7. Use concat() function to join dataframes.
-8. Don't use xlswriter to save the file.
-9. Don't add unnecessary columns."""
+3. Return the python code to modify the complete file and save it.
+4. Your response must not include code-blocks or MARKDOWN.
+5. Initialize the given variables in the beginning of the code.
+6. Use concat() function to join dataframes.
+7. Don't use xlswriter to save the file.
+8. Don't add unnecessary columns."""
+# AI don't have a consistent behavior for this task. This task was seperated from this ExcelContentModifierAgent prompt and it's being handled as a specific case by the ExcelGenericContentModifierAgent.
+#3. In the end, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Make sure that every cell of 'TaskWorkload' column have 5 decimal places after the ','.
 
 EXAMPLE_CODE_PROMPTS_CATEGORY_TEST_EXECUTION = [
     {
