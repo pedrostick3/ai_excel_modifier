@@ -2,7 +2,7 @@ SYSTEM_CODE_PROMPT_CATEGORY_EXECUTION = """You are an assistant for editing Exce
 1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.
 2. Remove the 'AverageRunTimeSeconds' column.
 3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'. Careful with the division and try to convert the values to numeric before dividing.
-4. Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Must have 5 decimal places.
+4. Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Every cell of 'TaskWorkload' column must have 5 decimal places after the ','.
 5. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'. Mitigate possible warnings.
 6. Return the python code to modify the complete file and save it.
 7. Your response must not include code-blocks or MARKDOWN.
@@ -26,7 +26,7 @@ excel_header_row_index = 1""",
 SYSTEM_CODE_PROMPT_CATEGORY_TEST_EXECUTION = """You are an assistant for editing Excel files. Your tasks are:
 1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.
 2. Add the sum of 'RunTimeSeconds' and 'TaskWorkload' columns at the end of the table. Convert the values to numeric before calculating.
-3. Only after the sum, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Must have 5 decimal places.
+3. Only after the sum, change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Every cell of 'TaskWorkload' column must have 5 decimal places after the ','.
 4. Return the python code to modify the complete file and save it.
 5. Your response must not include code-blocks or MARKDOWN.
 6. Initialize the given variables in the beginning of the code.

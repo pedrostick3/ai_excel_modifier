@@ -139,7 +139,7 @@ Important:
                     ai_analytics_file_name=os.path.basename(file_path),
                 )
                 ExcelGenericContentModifierAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_by_category_returning_code(
-                    user_prompt="Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Every cell of 'TaskWorkload' column must have 5 decimal places.",
+                    user_prompt="Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000). Every cell of 'TaskWorkload' column must have 5 decimal places after the ','.",
                     input_excel_file_path=output_file_path,
                     output_excel_file_path=output_file_path,
                     ai_analytics_file_name=os.path.basename(file_path),
