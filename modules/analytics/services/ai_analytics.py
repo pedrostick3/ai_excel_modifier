@@ -66,16 +66,23 @@ class AiAnalytics:
             raise ValueError("O formato do texto fornecido não é válido. Verifique os delimitadores '#####'.")
 
         # Configurações fixas para o Excel
-        pricing = {
-            "AI Model": "gpt-4o-mini",
-            "Pricing Input per 1M Tokens": 0.15,
-            "Pricing Output per 1M Tokens": 0.6,
+        constants = {
             "1 Million Tokens": 1000000,
             "MAX_EXCEL_LINES_PER_AI_REQUEST": configs.MAX_EXCEL_LINES_PER_AI_REQUEST,
         }
+        pricings = {
+            "gpt-4o-mini": {
+                "Pricing Input per 1M Tokens": 0.15,
+                "Pricing Output per 1M Tokens": 0.6,
+            },
+            "gpt-4o": {
+                "Pricing Input per 1M Tokens": 2.5,
+                "Pricing Output per 1M Tokens": 10,
+            },
+        }
 
         # Função para processar os dados
-        def process_data_per_section(raw_section: str, pricing: dict[str, any] = pricing) -> list[dict[str, any]]:
+        def process_data_per_section(raw_section: str) -> list[dict[str, any]]:
             try:
                 section_lines = raw_section.strip().split("\n")
                 section_title = section_lines[0].strip()
@@ -92,8 +99,8 @@ class AiAnalytics:
                         continue
 
                     agent, ai_model, prompt_tokens, completion_tokens, total_tokens, duration = match.groups()
-                    prompt_tokens_cost = int(prompt_tokens) * pricing["Pricing Input per 1M Tokens"] / pricing["1 Million Tokens"]
-                    completion_tokens_cost = int(completion_tokens) * pricing["Pricing Output per 1M Tokens"] / pricing["1 Million Tokens"]
+                    prompt_tokens_cost = int(prompt_tokens) * pricings[ai_model]["Pricing Input per 1M Tokens"] / constants["1 Million Tokens"]
+                    completion_tokens_cost = int(completion_tokens) * pricings[ai_model]["Pricing Output per 1M Tokens"] / constants["1 Million Tokens"]
                     total_tokens_cost = prompt_tokens_cost + completion_tokens_cost
 
                     rows.append({
@@ -194,13 +201,28 @@ class AiAnalytics:
             os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
             with pd.ExcelWriter(output_file_path, engine="openpyxl") as writer:
                 # Escrever configurações
-                pd.DataFrame({
-                    "Description": [key for key in pricing.keys()],
-                    "Value": [value for value in pricing.values()],
-                }).to_excel(writer, index=False, header=False, startrow=1, startcol=1)
-
-                # Escrever dados principais
-                pd.DataFrame(rows).to_excel(writer, index=False, startrow=len(pricing)+2, startcol=1)
+                # Prepare constants and pricing data for Excel
+                constants_df = pd.DataFrame(list(constants.items()), columns=["Constants Descriptions", "Constants Values"])
+                pricing_df = pd.DataFrame(
+                    [(model, details["Pricing Input per 1M Tokens"], details["Pricing Output per 1M Tokens"]) for model, details in pricings.items()],
+                    columns=["AI Models", "Pricing Input per 1M Tokens", "Pricing Output per 1M Tokens"],
+                )
+                
+                # Determine the maximum length for alignment
+                max_length = max(len(constants_df), len(pricing_df))
+                
+                # Extend dataframes to the same length
+                constants_df = constants_df.reindex(range(max_length)).fillna("")
+                pricing_df = pricing_df.reindex(range(max_length)).fillna("")
+                
+                # Combine constants and pricing data
+                combined_df = pd.concat([constants_df, pd.DataFrame({"": [""] * max_length}), pricing_df], axis=1)
+                
+                # Write combined data to Excel
+                combined_df.to_excel(writer, index=False, startrow=1, startcol=1)
+                
+                # Write main data to Excel
+                pd.DataFrame(rows).to_excel(writer, index=False, startrow=max_length + 2 + 1, startcol=1) # +2 for the first and last empty rows and +1 for the header row
         except Exception as e:
             raise IOError(f"Erro ao exportar os dados para Excel: {e}")
 

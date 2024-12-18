@@ -207,8 +207,11 @@ class ExcelService:
                 logging.error(f"Invalid input file type: {file_extension}")
                 raise ValueError(f"Invalid input file type: {file_extension}")
 
-            # Replace the specified rows with new data
-            existing_data_frame.iloc[initial_index_for_replacement:final_index_for_replacement] = new_data_frame.values
+            # Delete rows
+            existing_data_frame.drop(existing_data_frame.index[initial_index_for_replacement:final_index_for_replacement])
+
+            # Add the specified rows with new data
+            existing_data_frame = pd.concat([existing_data_frame.iloc[:initial_index_for_replacement], new_data_frame, existing_data_frame.iloc[final_index_for_replacement:]], ignore_index=True)
 
             # Save the modified DataFrame to the output file
             if file_extension == '.csv':
@@ -338,3 +341,63 @@ class ExcelService:
             logging.error(f"Error summing columns in the file: {e}")
             return False
         
+    def get_excel_csv_pre_header(excel_input_file_path: str, header_row_number: int) -> str:
+        """
+        Reads the rows before the header in an Excel or CSV file and returns them as a CSV formatted string.
+
+        Args:
+            excel_input_file_path (str): The path to the Excel or CSV file.
+            header_row_number (int): The row number of the header in the file.
+
+        Returns:
+            str: A string containing the pre-header rows in CSV format.
+        """
+        try:
+            _, file_extension = os.path.splitext(excel_input_file_path)
+            if file_extension.lower() == '.csv':
+                dataFrame = pd.read_csv(excel_input_file_path, header=None, nrows=header_row_number-1)
+            else:
+                dataFrame = pd.read_excel(excel_input_file_path, header=None, nrows=header_row_number-1)
+
+            return dataFrame.to_csv(index=False, header=False)
+        except Exception as e:
+            logging.error(f"Error reading the pre-header rows: {e}")
+            raise
+    
+    def add_excel_csv_pre_header(pre_header_data: str, excel_file_path: str) -> bool:
+        """
+        Adds the pre-header data to the top of an Excel or CSV file.
+
+        Args:
+            pre_header_data (str): The pre-header data in CSV format.
+            excel_file_path (str): The path to save the resulting file.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+        try:
+            # Read the existing file into a DataFrame
+            _, file_extension = os.path.splitext(excel_file_path)
+            if file_extension.lower() == '.csv':
+                existing_data_frame = pd.read_csv(excel_file_path, header=None)
+            else:
+                existing_data_frame = pd.read_excel(excel_file_path, header=None)
+
+            # Convert the pre-header data to a DataFrame
+            pre_header_data_frame = pd.read_csv(StringIO(pre_header_data), header=None)
+
+            # Combine the pre-header data with the existing data
+            combined_data_frame = pd.concat([pre_header_data_frame, existing_data_frame], ignore_index=True)
+
+            # Save the combined DataFrame to the output file
+            if file_extension.lower() == '.csv':
+                combined_data_frame.to_csv(excel_file_path, index=False, header=False)
+                logging.info(f"File successfully saved as CSV at: {excel_file_path}")
+            else:
+                combined_data_frame.to_excel(excel_file_path, index=False, header=False, engine='openpyxl')
+                logging.info(f"File successfully saved as Excel at: {excel_file_path}")
+
+            return True
+        except Exception as e:
+            logging.error(f"Error adding pre-header data to the file: {e}")
+            return False

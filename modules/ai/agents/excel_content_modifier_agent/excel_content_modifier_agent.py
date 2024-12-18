@@ -1,6 +1,7 @@
 import os
 import logging
 import modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_agent_prompts as prompts
+import modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_agent_code_prompts as code_prompts
 from modules.ai.services.ai_service import AiService
 from modules.excel.services.excel_service import ExcelService
 import modules.excel.constants.excel_constants as excel_constants
@@ -21,7 +22,7 @@ class ExcelContentModifierAgent:
 
     def ask_ai(
         self,
-        excel_data: str,
+        user_role_request_prompt: str,
         system_prompt: str,
         example_prompts: list[dict] | None = None,
         ai_analytics_file_name: str = None,
@@ -41,12 +42,11 @@ class ExcelContentModifierAgent:
             str: The AI's response.
         """
         try:
-            user_prompt = f"""{excel_data}"""
             ai_response = self.ai_service.ask_ai(
                 model=self.model,
                 system_prompt=system_prompt,
                 example_prompts=example_prompts,
-                first_user_prompt=user_prompt,
+                first_user_prompt=user_role_request_prompt,
                 use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
                 response_format=None,
                 ai_analytics_file_name=ai_analytics_file_name,
@@ -122,7 +122,7 @@ class ExcelContentModifierAgent:
 
                 try:
                     agent_response = self.ask_ai(
-                        excel_data=excel_to_send,
+                        user_role_request_prompt=f"{excel_to_send}",
                         system_prompt=system_prompt,
                         example_prompts=example_prompts,
                         ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
@@ -139,7 +139,7 @@ class ExcelContentModifierAgent:
         else:
             try:
                 excel_content_modifier_agent_response.append(self.ask_ai(
-                    excel_data=excel_data,
+                    user_role_request_prompt=f"{excel_data}",
                     system_prompt=system_prompt,
                     example_prompts=example_prompts,
                     ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
@@ -174,3 +174,61 @@ class ExcelContentModifierAgent:
 
         # Retorna apenas as linhas após o cabeçalho
         return excel_constants.EXCEL_LINE_BREAK.join(lines[header_index + 1:]) if header_index != -1 else excel_data
+    
+    def do_your_work_by_category_returning_code(
+        self,
+        category: FileCategory,
+        input_excel_file_path: str,
+        output_excel_file_path: str,
+        excel_header_row_index: int,
+        ai_analytics_file_name: str = None,
+    ) -> None:
+        """
+        Processes an Excel file by splitting it into parts if it exceeds a specified number of lines,
+        sends each part to an AI service for modification, and saves the modified content back to the file.
+
+        Args:
+            category (FileCategory): The category of the file.
+            excel_input_file_path (str): The path to the Excel file to be processed.
+            excel_output_file_path (str): The path to the Excel file to be saved.
+            excel_header_row_index (int): The row index of the header in the Excel file.
+            ai_analytics_file_name (str, optional): The AI analytics file name to be used. Defaults to None.
+
+        Returns:
+            None
+        """
+        if category == FileCategory.EXECUCAO:
+            system_prompt = code_prompts.SYSTEM_CODE_PROMPT_CATEGORY_EXECUTION
+        elif category == FileCategory.TESTE_EXECUCAO:
+            system_prompt = code_prompts.SYSTEM_CODE_PROMPT_CATEGORY_TEST_EXECUTION
+        else:
+            raise ValueError(f"AI ExcelContentModifierAgent: Invalid category: {category}")
+
+        try:
+            excel_data = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path)
+        except Exception as e:
+            logging.error(f"AI ExcelContentModifierAgent: Error reading Excel file: {e}")
+            raise
+
+        file_name = os.path.basename(input_excel_file_path)
+        excel_lines = excel_data.split(excel_constants.EXCEL_LINE_BREAK)
+        excel_lines_count = len(excel_lines) - 1
+        logging.info(f"AI ExcelContentModifierAgent - {category} - The file '{input_excel_file_path}' has {excel_lines_count} lines.")
+        
+        try:
+            python_code = self.ask_ai(
+                user_role_request_prompt=f"""input_excel_file_path = '{input_excel_file_path}'
+output_excel_file_path = '{output_excel_file_path}'
+excel_header_row_index = {excel_header_row_index}""",
+                system_prompt=system_prompt,
+                ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
+            )
+        except Exception as e:
+            logging.error(f"AI ExcelContentModifierAgent: Error communicating with AI: {e}")
+            raise
+
+        try:
+            exec(python_code, globals())
+        except Exception as e:
+            logging.error(f"AI ExcelContentModifierAgent: Error running the AI python code: {e}")
+            raise
