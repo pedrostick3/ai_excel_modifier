@@ -12,23 +12,20 @@ Your response should only include one JSON with the following format:
 {
     "category": <category_name>
 }
-No code-blocks or MARKDOWN are allowed in the response.
-"""
+No code-blocks or MARKDOWN are allowed in the response."""
 # 'Execução' é considerado violento então o GPT retorna 'None'.
 
 EXAMPLE_PROMPTS = [
     {
         "role": "user",
-        "content": """
-Filename = 'Test_Execution_data Template.xlsx'
+        "content": """Filename = 'Test_Execution_data Template.xlsx'
 ```csv
 Test execution date,2024-10-30 12:15:38.947,,,,,,,
 Total run time,3910,,,,,,,
 ,,,,,,,,
 ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
 153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
-```
-""",
+```""",
     },
     {
         "role": "assistant",

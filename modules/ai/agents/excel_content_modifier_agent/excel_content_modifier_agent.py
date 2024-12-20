@@ -5,7 +5,7 @@ import modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_age
 from modules.ai.services.ai_service import AiService
 from modules.excel.services.excel_service import ExcelService
 import modules.excel.constants.excel_constants as excel_constants
-from modules.ai.agents.excel_categorizer_agent.enums.file_category import FileCategory
+from modules.ai.enums.file_category import FileCategory
 
 
 class ExcelContentModifierAgent:

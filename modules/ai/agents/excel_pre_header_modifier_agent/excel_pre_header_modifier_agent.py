@@ -3,7 +3,7 @@ import logging
 import modules.ai.agents.excel_pre_header_modifier_agent.excel_pre_header_modifier_agent_prompts as prompts
 from modules.ai.services.ai_service import AiService
 from modules.excel.services.excel_service import ExcelService
-from modules.ai.agents.excel_categorizer_agent.enums.file_category import FileCategory
+from modules.ai.enums.file_category import FileCategory
 
 
 class ExcelPreHeaderModifierAgent:

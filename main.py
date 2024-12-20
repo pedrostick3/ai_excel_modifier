@@ -9,7 +9,7 @@ from modules.ai.agents.excel_header_finder_agent.excel_header_finder_agent impor
 from modules.ai.agents.excel_pre_header_modifier_agent.excel_pre_header_modifier_agent import ExcelPreHeaderModifierAgent
 from modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_agent import ExcelContentModifierAgent
 from modules.ai.agents.excel_generic_content_modifier_agent.excel_generic_content_modifier_agent import ExcelGenericContentModifierAgent
-from modules.ai.agents.excel_categorizer_agent.enums.file_category import FileCategory
+from modules.ai.enums.file_category import FileCategory
 from modules.analytics.services.ai_analytics import AiAnalytics
 
 

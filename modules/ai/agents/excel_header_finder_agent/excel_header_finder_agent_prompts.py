@@ -1,14 +1,12 @@
 # Esta prompt teve de ser alterada para JSON devido à AI retornar constantemente "None" como resposta por achar que 'Execução' é uma palavra violenta.
-SYSTEM_PROMPT_JSON = """
-You are an assistant for analyzing Excel files.
+SYSTEM_PROMPT_JSON = """You are an assistant for analyzing Excel files.
 You need to identify where the table starts by finding the row with the column names.
 Your response should only include one JSON with the following format:
 {
     "row_number": "<row_number>",
     "row_content": "<row_content>"
 }
-No code-blocks or MARKDOWN are allowed in the response.
-"""
+No code-blocks or MARKDOWN are allowed in the response."""
 
 EXAMPLE_PROMPTS_JSON = [
     {
@@ -21,11 +19,9 @@ ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,Task
     },
     {
         "role": "assistant",
-        "content": """
-{
+        "content": """{
     "row_number": "4",
     "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"
-}
-""",
+}""",
     },
 ]

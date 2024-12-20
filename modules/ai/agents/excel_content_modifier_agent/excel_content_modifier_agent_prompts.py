@@ -1,5 +1,4 @@
-SYSTEM_PROMPT_CATEGORY_EXECUTION = """
-You are an assistant for editing Excel files. Your tasks are:
+SYSTEM_PROMPT_CATEGORY_EXECUTION = """You are an assistant for editing Excel files. Your tasks are:
 1. Move the 'IsSuccessful' column to column A, shifting the remaining columns to the right.
 2. Remove the 'AverageRunTimeSeconds' column.
 3. Add a new column 'RunTimeMinutes' at the last position of the table and set each value to 'RunTimeSeconds/60'.
@@ -7,8 +6,7 @@ You are an assistant for editing Excel files. Your tasks are:
 5. Change the format of the columns 'ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', and 'CaseEndDate' to 'dd-MM-yyyy HH:mm:ss.mmm'.
 6. Return the complete modified file with the same amount of rows (even if they are the same).
 7. Your response must not include code-blocks or MARKDOWN.
-8. You should not add extra commas.
-"""
+8. You should not add extra commas."""
 
 EXAMPLE_PROMPTS_CATEGORY_EXECUTION = [
     {
@@ -27,14 +25,12 @@ EXAMPLE_PROMPTS_CATEGORY_EXECUTION = [
     },
 ]
 
-SYSTEM_PROMPT_CATEGORY_TEST_EXECUTION = """
-You are an assistant for editing Excel files. Your tasks are:
+SYSTEM_PROMPT_CATEGORY_TEST_EXECUTION = """You are an assistant for editing Excel files. Your tasks are:
 1. Reorder the columns to: 'ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds'.
 2. Change each value in the 'TaskWorkload' column by replacing '.' with ',' (e.g., 2.00000 becomes 2,00000).
 3. Return the complete modified file with the same amount of rows (even if they are the same).
 4. Your response must not include code-blocks or MARKDOWN.
-5. You should not add extra commas.
-"""
+5. You should not add extra commas."""
 # Não consegue fazer contas com precisão nem consistência # "Add the sum of the data at the end of the 'RunTimeSeconds' and 'TaskWorkload' columns."
 
 EXAMPLE_PROMPTS_CATEGORY_TEST_EXECUTION = [

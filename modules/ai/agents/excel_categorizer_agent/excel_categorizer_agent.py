@@ -5,7 +5,7 @@ import shutil
 import modules.ai.agents.excel_categorizer_agent.excel_categorizer_agent_prompts as prompts
 from modules.ai.services.ai_service import AiService
 from modules.excel.services.excel_service import ExcelService
-from modules.ai.agents.excel_categorizer_agent.enums.file_category import FileCategory
+from modules.ai.enums.file_category import FileCategory
 import constants.configs as configs
 
 
