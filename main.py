@@ -11,6 +11,7 @@ from modules.ai.agents.excel_pre_header_modifier_agent.excel_pre_header_modifier
 from modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_agent import ExcelContentModifierAgent
 from modules.ai.agents.excel_generic_content_modifier_agent.excel_generic_content_modifier_agent import ExcelGenericContentModifierAgent
 from modules.ai.function_calls_agent.excel_sum_columns_agent.excel_sum_columns_agent import ExcelSumColumnsAgent
+from modules.ai.file_search_agent.file_search_agent.file_search_agent import FileSearchAgent
 from modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent import ExcelGenericFinetuningAgent
 from modules.ai.enums.file_category import FileCategory
 from modules.analytics.services.ai_analytics import AiAnalytics
@@ -22,6 +23,7 @@ CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
 AZURE_FINETUNING_MODEL = configs.AZURE_FINETUNING_MODEL
 MAKE_AI_RETURN_CODE = True
 USE_GENERIC_CONTENT_MODIFIER_AGENT = False
+TEST_FILE_SEARCH_ONLY = True
 TEST_FUNCTION_CALLS_ONLY = True
 USE_FINETUNING_AGENT = False
 
@@ -59,6 +61,20 @@ def main():
     for file_name in input_files:
         file_path = os.path.join(configs.INPUT_FOLDER, file_name)
         logging.info(f"#### Start processing file: {file_path} ####")
+
+        if TEST_FILE_SEARCH_ONLY:
+            ##### Teste File Search - START #####
+            # Somar colunas indicadas pelo user
+            logging.info("#TEST_FILE_SEARCH_ONLY - START - FileSearchAgent")
+            function_call_agent_response = FileSearchAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
+                column_to_sum="RunTimeSeconds",
+                input_excel_file_path=file_path,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {function_call_agent_response}")
+            logging.info("#TEST_FILE_SEARCH_ONLY - END - FileSearchAgent")
+            ##### Teste File Search - END #####
+            continue
 
         if TEST_FUNCTION_CALLS_ONLY:
             logging.info("#TEST_FUNCTION_CALLS_ONLY - START - ExcelHeaderFinderAgent (getting excel_header_row_index)")
@@ -132,6 +148,10 @@ def main():
             # TODO: Testes Extras:
             # TODO (continuação): - Fazer apenas 1 pedido com todos os steps numa única prompt
             # TODO (continuação): - Fazer testes com vários tamanhos de ficheiros (e meio desorganizados)
+
+            # TODO [PD]: Testes a realizar com a conta da Azure (com subscrição pay-as-you-go):
+            # TODO [PD]: - Fine-Tuning (USE_FINETUNING_AGENT);
+            # TODO [PD]: - File Search (TEST_FILE_SEARCH_ONLY);
 
             fine_tuning_agent.modify_content(
                 category=excel_categorizer_agent_response,

@@ -113,18 +113,20 @@ class OpenAiAiService(AiService):
                 execution_time_in_seconds=execution_time,
             )
 
-            messageContent = response.choices[0].message.content
-            messageFunctionCalls = response.choices[0].message.tool_calls
+            message = response.choices[0].message
+            messageContent = message.content
+            messageFunctionCalls = message.tool_calls[0] if message.tool_calls else None
 
             if log_response_message:
                 logging.info(f"response messages usage: {response.usage}")
+                logging.info(f"response message: {message}")
                 logging.info(f"response message content: {messageContent}")
-                if tools:
+                if tools and messageFunctionCalls:
                     logging.info(f"response message tool function calls: {messageFunctionCalls}")
 
-            self.followup_conversation_messages.append({"role": response.choices[0].message.role, "content": messageContent})
+            self.followup_conversation_messages.append(message)
 
-            return str(messageFunctionCalls) if tools and messageFunctionCalls else messageContent
+            return messageFunctionCalls.model_dump_json() if tools and messageFunctionCalls else messageContent
         except Exception as e:
             logging.error(f"Erro ao comunicar com a AI: {e}")
             raise
