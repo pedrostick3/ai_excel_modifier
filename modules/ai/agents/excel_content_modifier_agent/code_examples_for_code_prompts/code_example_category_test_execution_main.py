@@ -13,7 +13,7 @@ except Exception as e:
     print(f'Error reading file: {e}')
     exit()
 
-# Reorder the columns
+# Step 1: Reorder the columns
 try:
     expected_columns_order = ['ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds']
     table_last_row = df.last_valid_index()
@@ -35,24 +35,7 @@ try:
 except KeyError as e:
     print(f'Error reordering columns - Missing expected columns: {e}')
 
-# Change dots to commas
-try:
-    # Check if the header row is defined and if the 'TaskWorkload' column is present
-    if excel_header_row_index is not None and excel_header_row_index < len(df):
-        # Access the 'TaskWorkload' column using the defined header
-        task_workload_col_index = df.iloc[excel_header_row_index].tolist().index('TaskWorkload')
-        
-        # Apply the replacement of dots with commas
-        df.iloc[excel_header_row_index + 1:, task_workload_col_index] = df.iloc[excel_header_row_index + 1:, task_workload_col_index].apply(lambda x: str(x).replace('.', ','))
-        
-        print('Changing dots to commas executed successfully - TaskWorkload values adjusted')
-        df.to_excel(output_excel_file_path, index=False, header=False)
-    else:
-        print('Error changing dots to commas - Header row not found or invalid')
-except Exception as e:
-    print(f'Error changing dots to commas - {str(e)}')
-
-# Add 'RunTimeSeconds' and 'TaskWorkload' sums
+# Step 2: Add 'RunTimeSeconds' and 'TaskWorkload' sums
 try:
     # Check if the header rows and last row are valid
     if excel_header_row_index is not None and table_last_row is not None and table_last_row >= excel_header_row_index:
@@ -77,6 +60,23 @@ except KeyError as e:
     print(f"Error adding 'RunTimeSeconds' and 'TaskWorkload' sums - Missing column: {e}")
 except Exception as e:
     print(f"Error adding 'RunTimeSeconds' and 'TaskWorkload' sums - {str(e)}")
+
+# Step 3: Change 'TaskWorkload' values from dots to commas
+try:
+    # Check if the header row is defined and if the 'TaskWorkload' column is present
+    if excel_header_row_index is not None and excel_header_row_index < len(df):
+        # Access the 'TaskWorkload' column using the defined header
+        task_workload_col_index = df.iloc[excel_header_row_index].tolist().index('TaskWorkload')
+        
+        # Apply the replacement of dots with commas
+        df.iloc[excel_header_row_index + 1:, task_workload_col_index] = df.iloc[excel_header_row_index + 1:, task_workload_col_index].apply(lambda x: f"{float(x):,.5f}".replace('.', ',') if pd.notnull(x) else x)
+        
+        print('Changing dots to commas executed successfully - TaskWorkload values adjusted')
+        df.to_excel(output_excel_file_path, index=False, header=False)
+    else:
+        print('Error changing dots to commas - Header row not found or invalid')
+except Exception as e:
+    print(f'Error changing dots to commas - {str(e)}')
 
 # Save the file
 try:

@@ -87,6 +87,36 @@ class ExcelService:
         except Exception as e:
             logging.error(f"Error finding the row number: {e}")
             raise
+    
+    @staticmethod
+    def get_excel_csv_column_values(
+        excel_input_file_path: str,
+        header_row_index: int,
+        column: str,
+    ) -> list[str]:
+        """
+        Reads the values of a column in an Excel or CSV file and returns them as a list.
+
+        Args:
+            excel_input_file_path (str): The path to the Excel or CSV file.
+            header_row_index (int): The row index of the header in the file.
+            column (str): The name of the column to extract.
+
+        Returns:
+            list[str]: A list containing the values of the column.
+        """
+        try:
+            # Read the file into a DataFrame
+            _, file_extension = os.path.splitext(excel_input_file_path)
+            if file_extension.lower() == '.csv':
+                dataFrame = pd.read_csv(excel_input_file_path, header=header_row_index)
+            else:
+                dataFrame = pd.read_excel(excel_input_file_path, header=header_row_index)
+
+            return dataFrame[column].tolist()
+        except Exception as e:
+            logging.error(f"Error reading the column values: {e}")
+            raise
 
     @staticmethod
     def get_excel_csv_rows_as_str(excel_file_path: str, rows_indexes: list[int]) -> str:

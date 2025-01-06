@@ -4,11 +4,14 @@ from datetime import datetime
 import constants.configs as configs
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.services.custom_ai_service import CustomAiService
+from modules.ai.services.azure_ai_service import AzureAiService
 from modules.ai.agents.excel_categorizer_agent.excel_categorizer_agent import ExcelCategorizerAgent
 from modules.ai.agents.excel_header_finder_agent.excel_header_finder_agent import ExcelHeaderFinderAgent
 from modules.ai.agents.excel_pre_header_modifier_agent.excel_pre_header_modifier_agent import ExcelPreHeaderModifierAgent
 from modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_agent import ExcelContentModifierAgent
 from modules.ai.agents.excel_generic_content_modifier_agent.excel_generic_content_modifier_agent import ExcelGenericContentModifierAgent
+from modules.ai.function_calls_agent.excel_sum_columns_agent.excel_sum_columns_agent import ExcelSumColumnsAgent
+from modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent import ExcelGenericFinetuningAgent
 from modules.ai.enums.file_category import FileCategory
 from modules.analytics.services.ai_analytics import AiAnalytics
 
@@ -16,8 +19,11 @@ from modules.analytics.services.ai_analytics import AiAnalytics
 CUSTOM_AI_SERVICE_BASE_URL = configs.GITHUB_BASE_URL
 CUSTOM_AI_SERVICE_KEY = configs.GITHUB_KEY
 CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
+AZURE_FINETUNING_MODEL = configs.AZURE_FINETUNING_MODEL
 MAKE_AI_RETURN_CODE = True
 USE_GENERIC_CONTENT_MODIFIER_AGENT = False
+TEST_FUNCTION_CALLS_ONLY = True
+USE_FINETUNING_AGENT = False
 
 def main():
     # Ficheiros para o PoC3
@@ -41,6 +47,11 @@ def main():
 
     # Configurar Custom AI Service
     ai_service = CustomAiService(CUSTOM_AI_SERVICE_KEY, CUSTOM_AI_SERVICE_BASE_URL)
+
+    if USE_FINETUNING_AGENT:
+        # Configurar Azure AI Service para Fine Tuning
+        fine_tuning_agent = ExcelGenericFinetuningAgent(AzureAiService(), AZURE_FINETUNING_MODEL)
+        fine_tuning_agent.create_fine_tuning_model()
     
     os.makedirs(configs.OUTPUT_FOLDER, exist_ok=True) # Criar pasta de output se não existir
 
@@ -48,6 +59,90 @@ def main():
     for file_name in input_files:
         file_path = os.path.join(configs.INPUT_FOLDER, file_name)
         logging.info(f"#### Start processing file: {file_path} ####")
+
+        if TEST_FUNCTION_CALLS_ONLY:
+            logging.info("#TEST_FUNCTION_CALLS_ONLY - START - ExcelHeaderFinderAgent (getting excel_header_row_index)")
+            excel_header_finder_agent_response_row_content = ExcelHeaderFinderAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).get_row_content(
+                excel_file_path=file_path,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            excel_header_row_index = ExcelService.get_excel_csv_row_number(file_path, excel_header_finder_agent_response_row_content) - 1
+            logging.info("#TEST_FUNCTION_CALLS_ONLY - END - ExcelHeaderFinderAgent (getting excel_header_row_index)")
+
+            ##### Teste Function Calls - START #####
+            # Somar colunas indicadas pelo user
+            logging.info("#TEST_FUNCTION_CALLS_ONLY - START - ExcelSumColumnsAgent")
+            function_call_agent_response = ExcelSumColumnsAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
+                column_to_sum="RunTimeSeconds",
+                input_excel_file_path=file_path,
+                excel_header_row_index=excel_header_row_index,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {function_call_agent_response}")
+            logging.info("#TEST_FUNCTION_CALLS_ONLY - END - ExcelSumColumnsAgent")
+            ##### Teste Function Calls - END #####
+            continue
+
+        if USE_FINETUNING_AGENT:
+            ##### Teste Fine Tuning - START #####
+            # 1. Categorizar Excel
+            logging.info("#1. START - ExcelGenericFinetuningAgent")
+            file_category = fine_tuning_agent.get_file_category(
+                excel_file_path=file_path,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            print(f"Fine Tuning file_category: {file_category}")
+            if file_category == FileCategory.INVALIDO:
+                logging.info(f"AI ExcelCategorizerAgent: The file '{file_path}' is '{file_category}'.")
+                continue
+            logging.info("#1. END - ExcelGenericFinetuningAgent")
+            exit() # TODO: EXIT() HERE!
+
+            new_file_name = f'{file_category.value} - {datetime.now().strftime("%d_%m_%Y")} - {file_name}'
+            output_file_path = f"{configs.OUTPUT_FOLDER}/{new_file_name}"
+
+            # 2. Perceber onde começa a tabela retornando a linha do cabeçalho
+            logging.info("#2. START - ExcelGenericFinetuningAgent")
+            excel_header = fine_tuning_agent.get_excel_header(
+                excel_file_path=file_path,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            logging.info("#2. END - ExcelGenericFinetuningAgent")
+
+            # 3. Modificar Excel antes do cabeçalho
+            logging.info("#3. START - ExcelGenericFinetuningAgent")
+            fine_tuning_agent.modify_pre_header(
+                category=file_category,
+                input_excel_file_path=file_path,
+                header_row_number=ExcelService.get_excel_csv_row_number(file_path, excel_header),
+                output_excel_file_path=output_file_path,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            logging.info("#3. END - ExcelGenericFinetuningAgent")
+
+            header_row_number = ExcelService.get_excel_csv_row_number(output_file_path, excel_header)
+            
+            # 4. Modificar Excel a partir do cabeçalho
+            logging.info("#4. START - ExcelGenericFinetuningAgent")
+            
+            # TODO: Parte 4 é a mais importante. Testar:
+            # TODO (continuação): - 1º retorna código a correr de acordo com o tipo/categoria do file;
+            # TODO (continuação): - 2º enviar o conteudo do ficheiro inteiro e transforma o conteudo para o que estamos à espera;
+            # TODO (continuação): - 3º utilizando as FunctionCalls, retorna a função a correr de acordo com o tipo/categoria do file; (será a mais infalivel)
+            # TODO: Testes Extras:
+            # TODO (continuação): - Fazer apenas 1 pedido com todos os steps numa única prompt
+            # TODO (continuação): - Fazer testes com vários tamanhos de ficheiros (e meio desorganizados)
+
+            fine_tuning_agent.modify_content(
+                category=excel_categorizer_agent_response,
+                input_excel_file_path=output_file_path,
+                output_excel_file_path=output_file_path,
+                excel_header_row_index=header_row_number - 1, # -1 para obter o index
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            logging.info("#4. END - ExcelGenericFinetuningAgent")
+            ##### Teste Fine Tuning - END #####
+            continue
 
         # 1. Categorizar Excel
         logging.info("#1. START - ExcelCategorizerAgent")

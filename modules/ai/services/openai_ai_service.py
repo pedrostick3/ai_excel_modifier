@@ -16,18 +16,29 @@ class OpenAiAiService(AiService):
         Initialize the OpenAI API.
         """
         openai.api_key = configs.OPENAI_API_KEY
+        self.client = openai
+
+    def get_ai_client(self) -> openai:
+        """
+        Get the client to be used for the AI/ML API.
+
+        Returns:
+            object: The client to be used.
+        """
+        return self.client
 
     def ask_ai(
         self,
         model: str,
-        system_prompt: str,
         first_user_prompt: str,
+        system_prompt: str | None = None,
         example_prompts: list[dict[str, str]] | None = None,
         continuous_user_conversation_prompt: str = None,
         use_assistant_instead_of_system: bool = False,
         response_format: None | dict = {"type": "json_object"},
         temperature: float = 1,
         top_p: float = 1,
+        tools: list[dict] = None,
         ai_analytics_file_name: str = None,
         ai_analytics_agent_name: str = None,
         log_request_messages: bool = True,
@@ -38,14 +49,15 @@ class OpenAiAiService(AiService):
 
         Args:
             model (str): The model to be used.
-            system_prompt (str): The system prompt to be used.
             first_user_prompt (str): The first user prompt to be used.
+            system_prompt (str | None): The system prompt to be used.
             example_prompts (list[dict[str, str]] | None): The example prompts to be used.
             continuous_user_conversation_prompt (str): The continuous user conversation message to be used.
             use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system.
             response_format (None | dict): The response format to be used.
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
             top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
+            tools (list[dict]): The tools to be used.
             ai_analytics_file_name (str): The AI analytics file name to be used.
             ai_analytics_agent_name (str): The AI analytics agent name to be used.
             log_request_messages (bool): Flag to indicate if the request messages should be logged.
@@ -60,7 +72,9 @@ class OpenAiAiService(AiService):
             else:
                 ai_role = "assistant" if use_assistant_instead_of_system else "system"
 
-                messages = [{"role": ai_role, "content": system_prompt}]
+                messages = []
+                if system_prompt:
+                    messages.append({"role": ai_role, "content": system_prompt})
                 if example_prompts and len(example_prompts) % 2 == 0:
                     messages.extend(example_prompts)
                 messages.append({"role": "user", "content": first_user_prompt})
@@ -79,12 +93,13 @@ class OpenAiAiService(AiService):
 
             logging.info(f"Wait for AI response...")
             start_time = time.time()
-            response = openai.chat.completions.create(
+            response = self.get_ai_client().chat.completions.create(
                 model=model,
                 messages=self.followup_conversation_messages,
                 response_format=response_format,
                 temperature=temperature,
                 top_p=top_p,
+                tools=tools,
             )
             execution_time = time.time() - start_time
             logging.info(f"AI response received after {execution_time} seconds")
@@ -98,13 +113,18 @@ class OpenAiAiService(AiService):
                 execution_time_in_seconds=execution_time,
             )
 
+            messageContent = response.choices[0].message.content
+            messageFunctionCalls = response.choices[0].message.tool_calls
+
             if log_response_message:
                 logging.info(f"response messages usage: {response.usage}")
-                logging.info(f"response message: {response.choices[0].message.content}")
+                logging.info(f"response message content: {messageContent}")
+                if tools:
+                    logging.info(f"response message tool function calls: {messageFunctionCalls}")
 
-            self.followup_conversation_messages.append({"role": response.choices[0].message.role, "content": response.choices[0].message.content})
+            self.followup_conversation_messages.append({"role": response.choices[0].message.role, "content": messageContent})
 
-            return response.choices[0].message.content
+            return str(messageFunctionCalls) if tools and messageFunctionCalls else messageContent
         except Exception as e:
             logging.error(f"Erro ao comunicar com a AI: {e}")
             raise

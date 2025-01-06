@@ -11,17 +11,27 @@ class AiService(object):
     
     followup_conversation_messages = []
 
+    def get_ai_client(self):
+        """
+        Get the client to be used for the AI/ML API.
+
+        Returns:
+            object: The client to be used.
+        """
+        raise NotImplementedError("Please Implement this method")
+
     def ask_ai(
         self,
         model: str,
-        system_prompt: str,
         first_user_prompt: str,
+        system_prompt: str | None = None,
         example_prompts: list[dict] | None = None,
         continuous_user_conversation_prompt: str = None,
         use_assistant_instead_of_system: bool = False,
         response_format: None | dict = JSON_RESPONSE_FORMAT,
         temperature: float = 1,
         top_p: float = 1,
+        tools: list[dict] = None,
         ai_analytics_file_name: str = None,
         ai_analytics_agent_name: str = None,
         log_request_messages: bool = True,
@@ -32,14 +42,15 @@ class AiService(object):
 
         Args:
             model (str): The model to be used.
-            system_prompt (str): The system prompt to be used.
             first_user_prompt (str): The first user prompt to be used.
+            system_prompt (str | None): The system prompt to be used.
             example_prompts (list[dict] | None): The example prompts to be used.
             continuous_user_conversation_prompt (str): The continuous user conversation message to be used.
             use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system.
             response_format (None | dict): The response format to be used.
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
             top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
+            tools (list[dict]): The tools to be used.
             ai_analytics_file_name (str): The AI analytics file name to be used.
             ai_analytics_agent_name (str): The AI analytics agent name to be used.
             log_request_messages (bool): Flag to indicate if the request messages should be logged.

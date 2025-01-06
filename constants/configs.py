@@ -35,3 +35,4 @@ OPENAI_MODEL = "gpt-4o-mini" # https://platform.openai.com/docs/models OR https:
 
 # Azure OpenAI Configs
 AZURE_PROJECT_CONNECTION_STRING = "<your_key>" # https://learn.microsoft.com/pt-pt/python/api/overview/azure/ai-projects-readme?view=azure-python-preview&preserve-view=true
+AZURE_FINETUNING_MODEL = "gpt-4o-mini" # https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning?tabs=azure-openai%2Cturbo%2Cpython-new&pivots=programming-language-python#create-a-customized-model

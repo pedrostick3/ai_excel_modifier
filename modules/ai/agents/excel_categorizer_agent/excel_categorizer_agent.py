@@ -61,7 +61,7 @@ Filename = '{file_name}'
 
             return ai_response
         except Exception as e:
-            logging.error(f"Erro ao comunicar com o AI ExcelHeaderFinderAgent: {e}")
+            logging.error(f"Erro ao comunicar com o AI ExcelCategorizerAgent: {e}")
             raise
 
     def do_your_work_with(

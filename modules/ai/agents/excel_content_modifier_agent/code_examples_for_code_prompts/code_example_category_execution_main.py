@@ -19,13 +19,13 @@ df = df.drop(columns=['AverageRunTimeSeconds'])
 # Convert 'RunTimeSeconds' to numeric and then divide
 df['RunTimeMinutes'] = pd.to_numeric(df['RunTimeSeconds'], errors='coerce') / 60
 
-# Step 4: Change each value in 'TaskWorkload' by replacing '.' with ','
-df['TaskWorkload'] = df['TaskWorkload'].apply(lambda x: f"{x:,.5f}".replace('.', ',') if pd.notnull(x) else x)
-
-# Step 5: Change format of date columns
+# Step 4: Change format of date columns
 date_columns = ['ExecutionStartDate', 'ExecutionEndDate', 'CaseStartDate', 'CaseEndDate']
 for col in date_columns:
     df[col] = pd.to_datetime(df[col], errors='coerce').dt.strftime('%d-%m-%Y %H:%M:%S.%f')
+    
+# Step 5: Change each value in 'TaskWorkload' by replacing '.' with ','
+df['TaskWorkload'] = df['TaskWorkload'].apply(lambda x: f"{x:,.5f}".replace('.', ',') if pd.notnull(x) else x)
 
 # Save the modified DataFrame to a new Excel file
 df.to_excel(output_excel_file_path, index=False)

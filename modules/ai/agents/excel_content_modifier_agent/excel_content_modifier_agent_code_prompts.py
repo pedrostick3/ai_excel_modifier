@@ -39,7 +39,7 @@ SYSTEM_CODE_PROMPT_CATEGORY_TEST_EXECUTION = """You are an assistant for editing
 EXAMPLE_CODE_PROMPTS_CATEGORY_TEST_EXECUTION = [
     {
         "role": "user",
-        "content": """input_excel_file_path = './assets/docs_input/Execution_data Template.xlsx'
+        "content": """input_excel_file_path = './assets/docs_input/Test_Execution_data Template.xlsx'
 output_excel_file_path = './assets/docs_output/Teste Execução - 13_12_2024 - Test_Execution_data Template.xlsx'
 excel_header_row_index = 3""",
     },
