@@ -12,6 +12,7 @@ from modules.ai.agents.excel_content_modifier_agent.excel_content_modifier_agent
 from modules.ai.agents.excel_generic_content_modifier_agent.excel_generic_content_modifier_agent import ExcelGenericContentModifierAgent
 from modules.ai.function_calls_agent.excel_sum_columns_agent.excel_sum_columns_agent import ExcelSumColumnsAgent
 from modules.ai.file_search_agent.file_search_agent.file_search_agent import FileSearchAgent
+from modules.ai.code_interpreter_agent.code_interpreter_agent.code_interpreter_agent import CodeInterpreterAgent
 from modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent import ExcelGenericFinetuningAgent
 from modules.ai.enums.file_category import FileCategory
 from modules.analytics.services.ai_analytics import AiAnalytics
@@ -23,6 +24,7 @@ CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
 AZURE_FINETUNING_MODEL = configs.AZURE_FINETUNING_MODEL
 MAKE_AI_RETURN_CODE = True
 USE_GENERIC_CONTENT_MODIFIER_AGENT = False
+TEST_CODE_INTERPRETER_ONLY = True
 TEST_FILE_SEARCH_ONLY = True
 TEST_FUNCTION_CALLS_ONLY = True
 USE_FINETUNING_AGENT = False
@@ -62,16 +64,30 @@ def main():
         file_path = os.path.join(configs.INPUT_FOLDER, file_name)
         logging.info(f"#### Start processing file: {file_path} ####")
 
-        if TEST_FILE_SEARCH_ONLY:
-            ##### Teste File Search - START #####
+        if TEST_CODE_INTERPRETER_ONLY:
+            ##### Teste Code Interpreter - START #####
             # Somar colunas indicadas pelo user
-            logging.info("#TEST_FILE_SEARCH_ONLY - START - FileSearchAgent")
-            function_call_agent_response = FileSearchAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
+            logging.info("#TEST_CODE_INTERPRETER_ONLY - START - CodeInterpreterAgent")
+            code_interpreter_agent_response = CodeInterpreterAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
                 column_to_sum="RunTimeSeconds",
                 input_excel_file_path=file_path,
                 ai_analytics_file_name=os.path.basename(file_path),
             )
-            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {function_call_agent_response}")
+            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {code_interpreter_agent_response}")
+            logging.info("#TEST_CODE_INTERPRETER_ONLY - END - CodeInterpreterAgent")
+            ##### Teste Code Interpreter - END #####
+            continue
+
+        if TEST_FILE_SEARCH_ONLY:
+            ##### Teste File Search - START #####
+            # Somar colunas indicadas pelo user
+            logging.info("#TEST_FILE_SEARCH_ONLY - START - FileSearchAgent")
+            file_search_agent_response = FileSearchAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
+                column_to_sum="RunTimeSeconds",
+                input_excel_file_path=file_path,
+                ai_analytics_file_name=os.path.basename(file_path),
+            )
+            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {file_search_agent_response}")
             logging.info("#TEST_FILE_SEARCH_ONLY - END - FileSearchAgent")
             ##### Teste File Search - END #####
             continue
@@ -152,6 +168,7 @@ def main():
             # TODO [PD]: Testes a realizar com a conta da Azure (com subscrição pay-as-you-go):
             # TODO [PD]: - Fine-Tuning (USE_FINETUNING_AGENT);
             # TODO [PD]: - File Search (TEST_FILE_SEARCH_ONLY);
+            # TODO [PD]: - Code Interpreter (TEST_CODE_INTERPRETER_ONLY);
 
             fine_tuning_agent.modify_content(
                 category=excel_categorizer_agent_response,
