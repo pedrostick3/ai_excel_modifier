@@ -66,6 +66,7 @@ def main():
         logging.info(f"#### Start processing file: {file_path} ####")
 
         if AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
+            # TODO: Not tested yet
             ##### Teste Code Interpreter - START #####
             # Somar colunas indicadas pelo user
             logging.info("#ASSISTANT_CODE_INTERPRETER - START - CodeInterpreterAgent")
@@ -80,6 +81,7 @@ def main():
             continue
 
         if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH:
+            # TODO: Not tested yet
             ##### Teste File Search - START #####
             # Somar colunas indicadas pelo user
             logging.info("#ASSISTANT_FILE_SEARCH - START - FileSearchAgent")

@@ -34,5 +34,10 @@ OPENAI_API_KEY = "<your_key>"
 OPENAI_MODEL = "gpt-4o-mini" # https://platform.openai.com/docs/models OR https://openai.com/api/pricing
 
 # Azure OpenAI Configs
-AZURE_PROJECT_CONNECTION_STRING = "<your_key>" # https://learn.microsoft.com/pt-pt/python/api/overview/azure/ai-projects-readme?view=azure-python-preview&preserve-view=true
-AZURE_FINETUNING_MODEL = "gpt-4o-mini" # https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning?tabs=azure-openai%2Cturbo%2Cpython-new&pivots=programming-language-python#create-a-customized-model
+# [Fine-tuning models Regions](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=global-standard%2Cstandard-chat-completions#fine-tuning-models)
+# [Azure Pricing Calculator](https://azure.microsoft.com/en-us/pricing/calculator/)
+# [Chat Quick Start Guide](https://learn.microsoft.com/pt-pt/azure/ai-services/openai/chatgpt-quickstart?tabs=command-line%2Ckeyless%2Cjavascript-keyless%2Ctypescript-keyless%2Cpython-new&pivots=programming-language-python#create-a-new-python-application)
+AZURE_ENDPOINT = "https://<your_azure_openai_resource_name>.openai.azure.com/" # Can be found in: Azure AI Foundry > Home > Azure OpenAI Endpoint (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning?tabs=azure-openai%2Cturbo%2Cpython-new&pivots=programming-language-python#create-a-customized-model)
+AZURE_API_KEY_1 = "<your_key>" # Can be found in: Azure AI Foundry > Home > API key 1 (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning?tabs=azure-openai%2Cturbo%2Cpython-new&pivots=programming-language-python#create-a-customized-model)
+AZURE_MODEL = "gpt-4o-mini" # Can be found in: Azure AI Foundry > Deployments > specific_model. It's the 'Name' propriety (not the 'Model Name' propriety). (https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning?tabs=azure-openai%2Cturbo%2Cpython-new&pivots=programming-language-python#create-a-customized-model)
+AZURE_API_VERSION = "2024-08-01-preview" # Can be found in: Azure AI Foundry > Deployments > specific_model > Endpoint > Target URI (https://learn.microsoft.com/en-us/azure/ai-services/openai/reference#rest-api-versioning)

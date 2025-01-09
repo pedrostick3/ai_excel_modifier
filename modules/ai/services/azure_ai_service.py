@@ -1,3 +1,4 @@
+from modules.ai.services.ai_service import AiService
 import constants.configs as configs
 from modules.analytics.services.ai_analytics import AiAnalytics
 from openai import AzureOpenAI
@@ -7,7 +8,7 @@ import logging
 import time
 
 
-class AzureAiService:
+class AzureAiService(AiService):
     """
     Service class to interact with Azure AI for generating responses based on prompts.
     """
@@ -16,12 +17,11 @@ class AzureAiService:
         """
         Initialize the Azure AI API.
         """
-        self.project = AIProjectClient.from_connection_string(
-            conn_str=configs.AZURE_PROJECT_CONNECTION_STRING,
-            credential=DefaultAzureCredential(),
+        self.client = AzureOpenAI(
+            azure_endpoint=configs.AZURE_ENDPOINT,
+            api_key=configs.AZURE_API_KEY_1,
+            api_version=configs.AZURE_API_VERSION,
         )
-        self.chat = self.project.inference.get_chat_completions_client()
-        self.client = self.project.inference.get_azure_openai_client()
 
     def get_ai_client(self) -> AzureOpenAI:
         """
@@ -98,7 +98,7 @@ class AzureAiService:
 
             logging.info(f"Wait for AI response...")
             start_time = time.time()
-            response = self.get_ai_client().completions.create(
+            response = self.get_ai_client().chat.completions.create(
                 model=model,
                 messages=self.followup_conversation_messages,
                 response_format=response_format,
@@ -112,15 +112,15 @@ class AzureAiService:
                 file_name=ai_analytics_file_name,
                 agent_name=ai_analytics_agent_name,
                 ai_model=model,
-                prompt_tokens=response["usage"]["prompt_tokens"],
-                completion_tokens=response["usage"]["completion_tokens"],
-                total_tokens=response["usage"]["total_tokens"],
+                prompt_tokens=response.usage.prompt_tokens,
+                completion_tokens=response.usage.completion_tokens,
+                total_tokens=response.usage.total_tokens,
                 execution_time_in_seconds=execution_time,
             )
 
-            message = response["choices"][0]["message"]
-            messageContent = message["content"]
-            messageFunctionCalls = message["tool_calls"][0] if message["tool_calls"] else None
+            message = response.choices[0].message
+            messageContent = message.content
+            messageFunctionCalls = message.tool_calls[0] if message.tool_calls else None
 
             if log_response_message:
                 logging.info(f"response messages usage: {response.usage}")
@@ -131,7 +131,7 @@ class AzureAiService:
 
             self.followup_conversation_messages.append(message)
 
-            return str(messageFunctionCalls) if tools and messageFunctionCalls else messageContent
+            return messageFunctionCalls.model_dump_json() if tools and messageFunctionCalls else messageContent
         except Exception as e:
             logging.error(f"Erro ao comunicar com a AI: {e}")
             raise
