@@ -1,5 +1,6 @@
 import json
 from modules.ai.fine_tuning_agents.excel_generic_agent import excel_generic_fine_tuning_agent_prompts
+import logging
 
 
 class FinetuningTrainingFileGenerator:
@@ -9,12 +10,17 @@ class FinetuningTrainingFileGenerator:
 
     # Dados a serem convertidos para JSONL
     all_poc3_prompt_data = [
-        {"messages": excel_generic_fine_tuning_agent_prompts.CATEGORIZER_PROMPTS},
-        {"messages": excel_generic_fine_tuning_agent_prompts.HEADER_FINDER_PROMPTS},
-        {"messages": excel_generic_fine_tuning_agent_prompts.PRE_HEADER_MODIFIER_CATEGORY_EXECUTION_PROMPTS},
-        {"messages": excel_generic_fine_tuning_agent_prompts.PRE_HEADER_MODIFIER_CATEGORY_TEST_EXECUTION_PROMPTS},
-        {"messages": excel_generic_fine_tuning_agent_prompts.CONTENT_MODIFIER_CATEGORY_EXECUTION_PROMPTS},
-        {"messages": excel_generic_fine_tuning_agent_prompts.CONTENT_MODIFIER_CATEGORY_TEST_EXECUTION_PROMPTS},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_INVALIDO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.PRE_HEADER_MODIFIER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.PRE_HEADER_MODIFIER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CONTENT_MODIFIER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_generic_fine_tuning_agent_prompts.CONTENT_MODIFIER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
     ]
 
     training_file = "./modules/ai/fine_tuning_agents/utils/training_file_generator/generated_training_files/excel_fine_tuning_data.jsonl"
@@ -34,7 +40,7 @@ class FinetuningTrainingFileGenerator:
         if not force_rewrite:
             try:
                 with open(FinetuningTrainingFileGenerator.training_file, "r", encoding="utf-8") as file:
-                    print(f"Ficheiro JSONL já existe em: {FinetuningTrainingFileGenerator.training_file}")
+                    logging.info(f"Ficheiro JSONL já existe em: {FinetuningTrainingFileGenerator.training_file}")
                     return
             except FileNotFoundError:
                 pass
@@ -44,4 +50,4 @@ class FinetuningTrainingFileGenerator:
                 json_line = json.dumps(entry, ensure_ascii=False)
                 file.write(json_line + "\n")
 
-        print(f"Ficheiro JSONL gerado em: {FinetuningTrainingFileGenerator.training_file}")
+        logging.info(f"Ficheiro JSONL gerado em: {FinetuningTrainingFileGenerator.training_file}")

@@ -2,8 +2,6 @@ from modules.ai.services.ai_service import AiService
 import constants.configs as configs
 from modules.analytics.services.ai_analytics import AiAnalytics
 from openai import AzureOpenAI
-from azure.ai.projects import AIProjectClient
-from azure.identity import DefaultAzureCredential
 import logging
 import time
 
@@ -44,6 +42,7 @@ class AzureAiService(AiService):
         temperature: float = 1,
         top_p: float = 1,
         tools: list[dict] = None,
+        base_model: str = None,
         ai_analytics_file_name: str = None,
         ai_analytics_agent_name: str = None,
         log_request_messages: bool = True,
@@ -58,11 +57,12 @@ class AzureAiService(AiService):
             system_prompt (str | None): The system prompt to be used.
             example_prompts (list[dict[str, str]] | None): The example prompts to be used.
             continuous_user_conversation_prompt (str): The continuous user conversation message to be used.
-            use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system.
+            use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system. "o1-preview" and "o1-mini" models require this parameter to be True.
             response_format (None | dict): The response format to be used.
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
             top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
             tools (list[dict]): The tools to be used.
+            base_model (str): The base model to be used in the Tokenizer.
             ai_analytics_file_name (str): The AI analytics file name to be used.
             ai_analytics_agent_name (str): The AI analytics agent name to be used.
             log_request_messages (bool): Flag to indicate if the request messages should be logged.
@@ -88,7 +88,7 @@ class AzureAiService(AiService):
             
             
             self.followup_conversation_messages = self.handle_conversation_messages_length(
-                model,
+                base_model if base_model else model,
                 self.followup_conversation_messages,
                 not_to_replace_first_messages=1 + len(example_prompts) if example_prompts and len(example_prompts) % 2 == 0 else 1, # system_prompt + example_prompts
             )

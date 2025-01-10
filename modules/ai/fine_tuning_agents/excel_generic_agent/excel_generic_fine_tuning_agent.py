@@ -7,6 +7,7 @@ from modules.ai.fine_tuning_agents.utils.training_file_generator.fine_tuning_tra
 from modules.ai.services.azure_ai_service import AzureAiService
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.enums.file_category import FileCategory
+from modules.ai.enums.ai_fine_tuning_job_status import AiFineTuningJobStatus
 import modules.excel.constants.excel_constants as excel_constants
 import constants.configs as configs
 
@@ -19,64 +20,82 @@ class ExcelGenericFinetuningAgent:
 
     def __init__(self,
         ai_service: AzureAiService,
-        model: str,
+        base_model: str,
         fine_tuning_model: str = None,
     ):
         """
         Initialize the AI Agent.
         """
         self.ai_service = ai_service
-        self.base_model = model
+        self.base_model = base_model
         self.fine_tuning_model = fine_tuning_model
     
     def create_fine_tuning_model(
         self,
-        generate_training_file: bool = False,
+        generate_training_file: bool = True,
         only_create_fine_tuning_model_if_not_exists: bool = True,
     ) -> None:
         """
         Create the fine-tuning model.
+        To deploy the created fine-tuning model, use the Azure AI Foundry Web Interface by following this [tutorial](https://dev.to/icebeam7/fine-tuning-a-model-with-azure-open-ai-studio-39p7).
+        You can try to deploy with code like [this](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/fine-tuning?tabs=azure-openai%2Cturbo%2Cpython-new&pivots=programming-language-python#deploy-a-fine-tuned-model).
+        If your're gona try to deploy with code, check this [stackoverflow answer](https://stackoverflow.com/a/77492894/16451258) too.
         """
         if only_create_fine_tuning_model_if_not_exists:
             jobs = self.ai_service.get_ai_client().fine_tuning.jobs.list()
-            if len(jobs.data) > 0:
+            logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Found {len(jobs.data)} fine-tuning jobs: {jobs.data}")
+            if len(jobs.data) > 0 and AiFineTuningJobStatus.is_succeed(jobs.data[0].status):
                 self.fine_tuning_model = jobs.data[0].fine_tuned_model
+                logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Fine-tuning model already exists: {self.fine_tuning_model}")
                 return self.fine_tuning_model
-        
+
         if generate_training_file:
             FinetuningTrainingFileGenerator.generate_training_file()
         
-        uploaded_file = self.ai_service.get_ai_client().files.create(
-            file=open(FinetuningTrainingFileGenerator.training_file, "rb"), # Individual files can be up to 512 MB in size.
-            purpose="fine-tune",
-        )
+        uploaded_files = self.ai_service.get_ai_client().files.list().data
+        training_file_already_uploaded = any(file.filename == os.path.basename(FinetuningTrainingFileGenerator.training_file) for file in uploaded_files)
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Training file already uploaded: {training_file_already_uploaded}")
+
+        if training_file_already_uploaded:
+            uploaded_file = next(file for file in uploaded_files if file.filename == os.path.basename(FinetuningTrainingFileGenerator.training_file))
+        else:
+            uploaded_file = self.ai_service.get_ai_client().files.create(
+                file=open(FinetuningTrainingFileGenerator.training_file, "rb"), # Individual files can be up to 512 MB in size.
+                purpose="fine-tune", # Can't be "fine-tuning"
+            )
+            uploaded_file = self.ai_service.get_ai_client().files.retrieve(uploaded_file.id)
+            if not AiFineTuningJobStatus.has_finished(uploaded_file.status):
+                logging.info(f"Uploaded file {uploaded_file.id} not finished. Status: {training_job.status}. Waiting...")
+                while not AiFineTuningJobStatus.has_finished(uploaded_file.status): # É quase instantâneo
+                    time.sleep(1) # 1 second
+                    uploaded_file = self.ai_service.get_ai_client().files.retrieve(uploaded_file.id)
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Uploaded file: {uploaded_file.model_dump_json(indent=2)}")
 
         training_job = self.ai_service.get_ai_client().fine_tuning.jobs.create(
-            training_file=uploaded_file.id, # The maximum file upload size is 1 GB.
-            model=self.model,
+            training_file=uploaded_file.id, # The maximum file upload size is 1 GB. Training file must have at least 10 examples.
+            model=self.base_model,
         )
-        print(f"create_fine_tuning_model - job: {training_job.model_dump_json(indent=2)}")
+        training_start_time = time.time()
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Training job: {training_job.model_dump_json(indent=2)}")
+        training_job = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id)
+        if not AiFineTuningJobStatus.has_finished(training_job.status):
+            logging.info(f"Training job {training_job.id} not finished. Status: {training_job.status}. Waiting...")
+            while not AiFineTuningJobStatus.has_finished(training_job.status): # It took 20m36s and used 55k tokens to train with the "gpt-4o-mini" model and 11 examples.
+                time.sleep(5) # 5 seconds
+                training_job = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id)
+        training_time = time.time() - training_start_time
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Training job {training_job.id} finished with status: {training_job.status} in {training_time} seconds.")
 
-        status = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id).status
-        if status not in ["succeeded", "failed"]:
-            print(f"Job not in terminal status: {status}. Waiting.")
-            while status not in ["succeeded", "failed"]: # TODO: Quanto tempo vai demorar? pode-se reescrever o treino através de algum id?
-                time.sleep(2)
-                status = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id).status
-                print(f"Status: {status}")
-        else:
-            print(f"Finetune job {training_job.id} finished with status: {status}")
-
-        print("Checking other finetune jobs in the subscription.")
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Checking other fine-tuning jobs in the subscription.")
         jobs = self.ai_service.get_ai_client().fine_tuning.jobs.list()
-        print(f"Found {len(jobs.data)} finetune jobs: {jobs.data}")
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Found {len(jobs.data)} fine-tuning jobs: {jobs.data}")
 
-        if len(jobs.data) == 0:
-            print("No finetune jobs found. Exiting.")
+        if len(jobs.data) == 0 or not AiFineTuningJobStatus.is_succeed(training_job.status):
+            logging.error("ExcelGenericFinetuningAgent - create_fine_tuning_model(): No valid fine-tuning jobs found.")
             return None
 
-        print(f"create_fine_tuning_model - fine_tuning_model: {jobs.data[0].fine_tuned_model}")
-        self.fine_tuning_model = jobs.data[0].fine_tuned_model # TODO: verificar se [0] é o mais recente
+        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Fine-tuning model: {jobs.data[0].fine_tuned_model}")
+        self.fine_tuning_model = jobs.data[0].fine_tuned_model
         return jobs.data[0].fine_tuned_model
 
     def ask_ai(
@@ -99,6 +118,7 @@ class ExcelGenericFinetuningAgent:
         try:
             ai_response = self.ai_service.ask_ai(
                 model=self.fine_tuning_model,
+                base_model=self.base_model,
                 first_user_prompt=user_prompt,
                 use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
                 ai_analytics_file_name=ai_analytics_file_name,
@@ -137,8 +157,6 @@ Filename = '{file_name}'
 ```csv
 {excel_data_first_5_rows}
 ```""",
-            file_name=file_name,
-            excel_data=excel_data_first_5_rows,
             ai_analytics_file_name=ai_analytics_file_name,
         )
 

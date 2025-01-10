@@ -22,8 +22,8 @@ from modules.analytics.services.ai_analytics import AiAnalytics
 CUSTOM_AI_SERVICE_BASE_URL = configs.GITHUB_BASE_URL
 CUSTOM_AI_SERVICE_KEY = configs.GITHUB_KEY
 CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
-AZURE_FINETUNING_MODEL = configs.AZURE_FINETUNING_MODEL
-AI_TYPE = AiType.ASSISTANT_CODE_INTERPRETER
+AZURE_FINETUNING_BASE_MODEL = configs.AZURE_MODEL
+AI_TYPE = AiType.FINE_TUNING
 
 def main():
     # Ficheiros para o PoC3
@@ -51,7 +51,7 @@ def main():
 
     if AI_TYPE == AiType.FINE_TUNING:
         # Configurar Azure AI Service para Fine Tuning
-        fine_tuning_agent = ExcelGenericFinetuningAgent(AzureAiService(), AZURE_FINETUNING_MODEL)
+        fine_tuning_agent = ExcelGenericFinetuningAgent(AzureAiService(), base_model=AZURE_FINETUNING_BASE_MODEL)
         fine_tuning_agent.create_fine_tuning_model()
 
     if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH or AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
