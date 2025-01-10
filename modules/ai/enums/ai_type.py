@@ -15,7 +15,10 @@ class AiType(Enum):
     COMPLETION_FUNCTION_CALLING = {
         "description": "Completion with Function Calling tool"
     }
-    FINE_TUNING = {"description": "Fine-tuning"}
+    FINE_TUNING = {
+        "description": "Fine-tuning",
+        "MERGE_CATEGORIZER_AND_HEADER_FINDER_IN_1_REQUEST": True,
+    }
     ASSISTANT_FILE_SEARCH = {"description": "Assistant with File Search tool"}
     ASSISTANT_CODE_INTERPRETER = {"description": "Assistant with Code Interpreter tool"}
 

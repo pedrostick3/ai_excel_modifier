@@ -10,6 +10,8 @@ from modules.ai.enums.file_category import FileCategory
 from modules.ai.enums.ai_fine_tuning_job_status import AiFineTuningJobStatus
 import modules.excel.constants.excel_constants as excel_constants
 import constants.configs as configs
+import modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent_prompts as prompts
+
 
 
 class ExcelGenericFinetuningAgent:
@@ -22,18 +24,25 @@ class ExcelGenericFinetuningAgent:
         ai_service: AzureAiService,
         base_model: str,
         fine_tuning_model: str = None,
+        create_fine_tuning_model: bool = False,
+        only_create_fine_tuning_model_if_not_exists: bool = True,
     ):
         """
         Initialize the AI Agent.
+
+        To create a fine-tuning model, the parameter 'create_fine_tuning_model' must be True and it's not necessary to pass the 'fine_tuning_model' parameter.
         """
         self.ai_service = ai_service
         self.base_model = base_model
         self.fine_tuning_model = fine_tuning_model
+        if create_fine_tuning_model:
+            self.create_fine_tuning_model(only_create_fine_tuning_model_if_not_exists=only_create_fine_tuning_model_if_not_exists)
     
     def create_fine_tuning_model(
         self,
         generate_training_file: bool = True,
         only_create_fine_tuning_model_if_not_exists: bool = True,
+        exit_to_deploy_fine_tuning_model_in_azure_ai_foundry_web_interface: bool = True,
     ) -> None:
         """
         Create the fine-tuning model.
@@ -80,7 +89,9 @@ class ExcelGenericFinetuningAgent:
         training_job = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id)
         if not AiFineTuningJobStatus.has_finished(training_job.status):
             logging.info(f"Training job {training_job.id} not finished. Status: {training_job.status}. Waiting...")
-            while not AiFineTuningJobStatus.has_finished(training_job.status): # It took 20m36s and used 55k tokens to train with the "gpt-4o-mini" model and 11 examples.
+            while not AiFineTuningJobStatus.has_finished(training_job.status):
+                # It took 20m36s and billed 55k tokens to train with the "gpt-4o-mini" model and 11 examples.
+                # It took 21m57s and billed 55k tokens to train with the "gpt-4o-mini" model and 18 examples.
                 time.sleep(5) # 5 seconds
                 training_job = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id)
         training_time = time.time() - training_start_time
@@ -96,11 +107,16 @@ class ExcelGenericFinetuningAgent:
 
         logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Fine-tuning model: {jobs.data[0].fine_tuned_model}")
         self.fine_tuning_model = jobs.data[0].fine_tuned_model
+
+        if exit_to_deploy_fine_tuning_model_in_azure_ai_foundry_web_interface:
+            logging.info("ExcelGenericFinetuningAgent - create_fine_tuning_model(): You must deploy the fine-tuning model in the Azure AI Foundry Web Interface.\nExiting...")
+            exit()
         return jobs.data[0].fine_tuned_model
 
     def ask_ai(
         self,
         user_prompt: str,
+        system_prompt: str,
         ai_analytics_file_name: str = None,
         log_messages: bool = True,
     ) -> str:
@@ -120,7 +136,9 @@ class ExcelGenericFinetuningAgent:
                 model=self.fine_tuning_model,
                 base_model=self.base_model,
                 first_user_prompt=user_prompt,
+                system_prompt=system_prompt,
                 use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
+                response_format=None,
                 ai_analytics_file_name=ai_analytics_file_name,
                 ai_analytics_agent_name="ExcelGenericFinetuningAgent",
                 log_request_messages=log_messages,
@@ -131,6 +149,98 @@ class ExcelGenericFinetuningAgent:
         except Exception as e:
             logging.error(f"Erro ao comunicar com o AI ExcelGenericFinetuningAgent: {e}")
             raise
+    
+    def _handle_category_from_ai_category_agent_response_string(
+        self,
+        ai_agent_response: str,
+        file_name: str,
+        excel_file_path: str,
+        invalid_output_path: str,
+        function_id_to_log: str,
+    ) -> FileCategory:
+        """
+        Handle the category from the AI category agent response string.
+
+        Args:
+            ai_agent_response (str): The AI category agent response.
+            file_name (str): The file name.
+            excel_file_path (str): The Excel file path.
+            invalid_output_path (str): The invalid output path.
+            function_id_to_log (str): The function ID to log.
+
+        Returns:
+            FileCategory: The FileCategory.
+        """
+        try:
+            ai_agent_response_dict = json.loads(ai_agent_response)
+        except json.JSONDecodeError or ValueError as e:
+            logging.error(f"Warning - {function_id_to_log}: Erro ao converter a resposta do AI para JSON: {e}\nai_agent_response = {ai_agent_response}")
+            raise
+
+        try:
+            category_by_ai = ai_agent_response_dict['category']
+        except KeyError as e:
+            logging.error(f"Warning - {function_id_to_log}: Erro ao obter a chave 'category' do JSON: {e}\nai_agent_response = {ai_agent_response_dict}")
+            raise
+
+        category = FileCategory.get_category_by_name(category_by_ai)
+        logging.info(f"{function_id_to_log}: returned '{category_by_ai}' so the file '{file_name}' is the '{category}' category.")
+        
+        if category == FileCategory.INVALIDO:
+            logging.info(f"{function_id_to_log}: O ficheiro '{file_name}' foi categorizado como 'INVALIDO'.")
+            invalid_output_path = f"{invalid_output_path}/{category.value} - {file_name}"
+            try:
+                shutil.copy2(excel_file_path, invalid_output_path)
+            except shutil.Error as e:
+                logging.error(f"{function_id_to_log}: Erro ao guardar o ficheiro '{invalid_output_path}'.")
+                raise
+        
+        return category
+
+    def get_file_category_and_header(
+        self,
+        excel_file_path: str,
+        invalid_output_path: str = configs.OUTPUT_FOLDER,
+        ai_analytics_file_name: str = None,
+    ) -> dict:
+        """
+        Get the file's category and header.
+
+        Args:
+            excel_file_path (str): The Excel file path.
+            invalid_output_path (str): The invalid output path.
+            ai_analytics_file_name (str): The AI analytics file name.
+
+        Returns:
+            dict: The file's category and header.
+        """
+        excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
+        file_name = os.path.basename(excel_file_path)
+        excel_categorizer_and_header_finder_agent_response = self.ask_ai(
+            system_prompt=prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+            user_prompt=f"""Categorize and find the header of the following file:
+Filename = '{file_name}'
+```csv
+{excel_data_first_5_rows}
+```""",
+            ai_analytics_file_name=ai_analytics_file_name,
+        )
+
+        self._handle_category_from_ai_category_agent_response_string(
+            ai_agent_response=excel_categorizer_and_header_finder_agent_response,
+            file_name=file_name,
+            excel_file_path=excel_file_path,
+            invalid_output_path=invalid_output_path,
+            function_id_to_log="AI ExcelGenericFinetuningAgent - get_file_category_and_header()",
+        )
+
+        try:
+            excel_categorizer_and_header_finder_agent_response_dict = json.loads(excel_categorizer_and_header_finder_agent_response)
+        except json.JSONDecodeError or ValueError as e:
+            logging.error(f"Warning - AI ExcelGenericFinetuningAgent - get_file_category_and_header(): Erro ao converter a resposta do AI para JSON: {e}\nexcel_categorizer_and_header_finder_agent_response = {excel_categorizer_and_header_finder_agent_response}")
+            raise
+            
+        return excel_categorizer_and_header_finder_agent_response_dict if excel_categorizer_and_header_finder_agent_response_dict else {}
 
     def get_file_category(
         self,
@@ -151,7 +261,8 @@ class ExcelGenericFinetuningAgent:
         """
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         file_name = os.path.basename(excel_file_path)
-        excel_categortizer_agent_response = self.ask_ai(
+        excel_categorizer_agent_response = self.ask_ai(
+            system_prompt=prompts.CATEGORIZER_SYSTEM_PROMPT,
             user_prompt=f"""Categorize the following file:
 Filename = '{file_name}'
 ```csv
@@ -160,31 +271,13 @@ Filename = '{file_name}'
             ai_analytics_file_name=ai_analytics_file_name,
         )
 
-        try:
-            excel_categortizer_agent_response_dict = json.loads(excel_categortizer_agent_response)
-        except json.JSONDecodeError or ValueError as e:
-            logging.error(f"Warning - AI ExcelGenericFinetuningAgent: Erro ao converter a resposta do AI para JSON: {e}\nexcel_categortizer_agent_response = {excel_categortizer_agent_response}")
-            raise
-
-        try:
-            category_by_ai = excel_categortizer_agent_response_dict['category']
-        except KeyError as e:
-            logging.error(f"Warning - AI ExcelGenericFinetuningAgent: Erro ao obter a chave 'category' do JSON: {e}\nexcel_categortizer_agent_response_dict = {excel_categortizer_agent_response_dict}")
-            raise
-
-        category = FileCategory.get_category_by_name(category_by_ai)
-        logging.info(f"AI ExcelGenericFinetuningAgent: returned '{category_by_ai}' so the file '{file_name}' is the '{category}' category.")
-        
-        if category == FileCategory.INVALIDO:
-            logging.info(f"AI ExcelGenericFinetuningAgent: O ficheiro '{file_name}' foi categorizado como 'INVALIDO'.")
-            invalid_output_path = f"{invalid_output_path}/{category.value} - {file_name}"
-            try:
-                shutil.copy2(excel_file_path, invalid_output_path)
-            except shutil.Error as e:
-                logging.error(f"AI ExcelGenericFinetuningAgent: Erro ao guardar o ficheiro '{invalid_output_path}'.")
-                raise
-            
-        return category
+        return self._handle_category_from_ai_category_agent_response_string(
+            ai_agent_response=excel_categorizer_agent_response,
+            file_name=file_name,
+            excel_file_path=excel_file_path,
+            invalid_output_path=invalid_output_path,
+            function_id_to_log="AI ExcelGenericFinetuningAgent - get_file_category()",
+        )
     
     def get_excel_header(self, excel_file_path: str, ai_analytics_file_name: str = None) -> str:
         """
@@ -200,8 +293,8 @@ Filename = '{file_name}'
         file_name = os.path.basename(excel_file_path)
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         excel_header_finder_agent_response = self.ask_ai(
+            system_prompt=prompts.HEADER_FINDER_SYSTEM_PROMPT,
             user_prompt=f"Find the header of the following file:\n{excel_data_first_5_rows}",
-            response_format=self.ai_service.JSON_RESPONSE_FORMAT, # {"type": "json_object"}
             ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
         )
 
@@ -237,6 +330,7 @@ Filename = '{file_name}'
         excel_data_first_rows_until_header = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path, only_get_first_rows=header_row_number)
         logging.info(f"AI ExcelGenericFinetuningAgent - {category} - excel_data_first_rows_until_header = {excel_data_first_rows_until_header}")
         excel_pre_header_modifier_agent_response = self.ask_ai(
+            system_prompt=prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
             user_prompt=f"Modify the pre-header of the following file that belongs to the '{category.value}' category:\n{excel_data_first_rows_until_header}",
             ai_analytics_file_name=ai_analytics_file_name,
         )
@@ -292,6 +386,7 @@ Filename = '{file_name}'
         
         try:
             python_code = self.ask_ai(
+                system_prompt=prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
                 user_prompt=f"""Return the python code to modify the content of the following file that belongs to the '{category.value}' category:
 input_excel_file_path = '{input_excel_file_path}'
 output_excel_file_path = '{output_excel_file_path}'

@@ -23,6 +23,7 @@ CUSTOM_AI_SERVICE_BASE_URL = configs.GITHUB_BASE_URL
 CUSTOM_AI_SERVICE_KEY = configs.GITHUB_KEY
 CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
 AZURE_FINETUNING_BASE_MODEL = configs.AZURE_MODEL
+AZURE_FINETUNING_MODEL = configs.AZURE_FINE_TUNING_MODEL
 AI_TYPE = AiType.FINE_TUNING
 
 def main():
@@ -51,8 +52,12 @@ def main():
 
     if AI_TYPE == AiType.FINE_TUNING:
         # Configurar Azure AI Service para Fine Tuning
-        fine_tuning_agent = ExcelGenericFinetuningAgent(AzureAiService(), base_model=AZURE_FINETUNING_BASE_MODEL)
-        fine_tuning_agent.create_fine_tuning_model()
+        fine_tuning_agent = ExcelGenericFinetuningAgent(
+            AzureAiService(),
+            base_model=AZURE_FINETUNING_BASE_MODEL,
+            fine_tuning_model=AZURE_FINETUNING_MODEL,
+            create_fine_tuning_model=False,
+        )
 
     if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH or AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
         # Configurar Azure AI Service para Assistants
@@ -120,29 +125,57 @@ def main():
 
         if AI_TYPE == AiType.FINE_TUNING:
             ##### Teste Fine Tuning - START #####
-            # 1. Categorizar Excel
-            logging.info("#1. START - ExcelGenericFinetuningAgent")
-            file_category = fine_tuning_agent.get_file_category(
-                excel_file_path=file_path,
-                ai_analytics_file_name=os.path.basename(file_path),
-            )
-            print(f"Fine Tuning file_category: {file_category}")
-            if file_category == FileCategory.INVALIDO:
-                logging.info(f"AI ExcelCategorizerAgent: The file '{file_path}' is '{file_category}'.")
-                continue
-            logging.info("#1. END - ExcelGenericFinetuningAgent")
-            exit() # TODO: EXIT() HERE!
+            if AiType.FINE_TUNING.value["MERGE_CATEGORIZER_AND_HEADER_FINDER_IN_1_REQUEST"]:
+                # 1. 2. Categorizar Excel e perceber onde começa a tabela retornando a linha do cabeçalho
+                logging.info("#1. 2. START - ExcelGenericFinetuningAgent")
+                file_category_and_header = fine_tuning_agent.get_file_category_and_header(
+                    excel_file_path=file_path,
+                    ai_analytics_file_name=os.path.basename(file_path),
+                )
+
+                # Get category from the agent response
+                try:
+                    category_by_ai = file_category_and_header['category']
+                except KeyError as e:
+                    logging.error(f"Warning - main() - AI_TYPE == AiType.FINE_TUNING: Erro ao obter \"file_category_and_header['category']\": {e}\nfile_category_and_header = {file_category_and_header}")
+                    raise
+                file_category = FileCategory.get_category_by_name(category_by_ai)
+                logging.info(f"main() - AI_TYPE == AiType.FINE_TUNING: The file '{file_name}' is '{file_category}' category.")
+                if file_category == FileCategory.INVALIDO:
+                    continue
+
+                # Get header from the agent response
+                try:
+                    excel_header = file_category_and_header['header']['row_content']
+                except KeyError as e:
+                    logging.error(f"Warning - main() - AI_TYPE == AiType.FINE_TUNING: Erro ao obter \"file_category_and_header['header']['row_content']\": {e}\nfile_category_and_header = {file_category_and_header}")
+                    raise
+
+                logging.info("#1. 2. END - ExcelGenericFinetuningAgent")
+                exit()
+            else:
+                # 1. Categorizar Excel
+                logging.info("#1. START - ExcelGenericFinetuningAgent")
+                file_category = fine_tuning_agent.get_file_category(
+                    excel_file_path=file_path,
+                    ai_analytics_file_name=os.path.basename(file_path),
+                )
+                print(f"Fine Tuning file_category: {file_category}")
+                if file_category == FileCategory.INVALIDO:
+                    logging.info(f"AI ExcelCategorizerAgent: The file '{file_path}' is '{file_category}'.")
+                    continue
+                logging.info("#1. END - ExcelGenericFinetuningAgent")
+
+                # 2. Perceber onde começa a tabela retornando a linha do cabeçalho
+                logging.info("#2. START - ExcelGenericFinetuningAgent")
+                excel_header = fine_tuning_agent.get_excel_header(
+                    excel_file_path=file_path,
+                    ai_analytics_file_name=os.path.basename(file_path),
+                )
+                logging.info("#2. END - ExcelGenericFinetuningAgent")
 
             new_file_name = f'{file_category.value} - {datetime.now().strftime("%d_%m_%Y")} - {file_name}'
             output_file_path = f"{configs.OUTPUT_FOLDER}/{new_file_name}"
-
-            # 2. Perceber onde começa a tabela retornando a linha do cabeçalho
-            logging.info("#2. START - ExcelGenericFinetuningAgent")
-            excel_header = fine_tuning_agent.get_excel_header(
-                excel_file_path=file_path,
-                ai_analytics_file_name=os.path.basename(file_path),
-            )
-            logging.info("#2. END - ExcelGenericFinetuningAgent")
 
             # 3. Modificar Excel antes do cabeçalho
             logging.info("#3. START - ExcelGenericFinetuningAgent")
@@ -156,7 +189,7 @@ def main():
             logging.info("#3. END - ExcelGenericFinetuningAgent")
 
             header_row_number = ExcelService.get_excel_csv_row_number(output_file_path, excel_header)
-            
+
             # 4. Modificar Excel a partir do cabeçalho
             logging.info("#4. START - ExcelGenericFinetuningAgent")
             
@@ -174,7 +207,7 @@ def main():
             # TODO [PD]: - Code Interpreter (AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER);
 
             fine_tuning_agent.modify_content(
-                category=excel_categorizer_agent_response,
+                category=file_category,
                 input_excel_file_path=output_file_path,
                 output_excel_file_path=output_file_path,
                 excel_header_row_index=header_row_number - 1, # -1 para obter o index

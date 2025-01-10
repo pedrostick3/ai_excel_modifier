@@ -79,6 +79,14 @@ class AiAnalytics:
                 "Pricing Input per 1M Tokens": 2.5,
                 "Pricing Output per 1M Tokens": 10,
             },
+            "gpt-4o-mini_fine-tuning": {
+                "Pricing Input per 1M Tokens": 0.3,
+                "Pricing Output per 1M Tokens": 1.2,
+            },
+            "gpt-4o_fine-tuning": {
+                "Pricing Input per 1M Tokens": 3.75,
+                "Pricing Output per 1M Tokens": 15,
+            },
         }
 
         # Função para processar os dados
@@ -99,14 +107,36 @@ class AiAnalytics:
                         continue
 
                     agent, ai_model, prompt_tokens, completion_tokens, total_tokens, duration = match.groups()
-                    prompt_tokens_cost = int(prompt_tokens) * pricings[ai_model]["Pricing Input per 1M Tokens"] / constants["1 Million Tokens"]
-                    completion_tokens_cost = int(completion_tokens) * pricings[ai_model]["Pricing Output per 1M Tokens"] / constants["1 Million Tokens"]
+                    ai_model_for_pricing_calcs = None
+
+                    if ai_model in pricings:
+                        ai_model_for_pricing_calcs = ai_model
+                    else:
+                        components = ai_model.split("-") # Example: gpt-4o-mini-2024-07-18-ft-bf955afee8a8468d90d7a50a5887c450
+                        try:
+                            ft_index = components.index("ft")
+                            model_type = components[ft_index]
+                            base_model = "-".join(components[:ft_index - 3])  # -3 = Exclude the api_version date
+                        except ValueError:
+                            model_type = None
+                            base_model = None
+
+                        # Check if type is 'ft' (fine-tuning)
+                        if model_type == "ft":
+                            fine_tuning_key = f"{base_model}_fine-tuning"
+                            ai_model_for_pricing_calcs = fine_tuning_key if fine_tuning_key in pricings else None
+
+                    if ai_model_for_pricing_calcs is None:
+                        raise ValueError(f"O modelo AI '{ai_model}' convertido para a key '{ai_model_for_pricing_calcs}' não foi encontrado nas configurações de preços.")
+
+                    prompt_tokens_cost = int(prompt_tokens) * pricings[ai_model_for_pricing_calcs]["Pricing Input per 1M Tokens"] / constants["1 Million Tokens"]
+                    completion_tokens_cost = int(completion_tokens) * pricings[ai_model_for_pricing_calcs]["Pricing Output per 1M Tokens"] / constants["1 Million Tokens"]
                     total_tokens_cost = prompt_tokens_cost + completion_tokens_cost
 
                     rows.append({
                         "File": file_name,
                         "Agent": agent,
-                        "AI Model": ai_model,
+                        "AI Model": ai_model if ai_model == ai_model_for_pricing_calcs else f"{ai_model} ({ai_model_for_pricing_calcs})",
                         "prompt_tokens used": int(prompt_tokens),
                         "prompt_tokens cost": prompt_tokens_cost,
                         "completion_tokens used": int(completion_tokens),
