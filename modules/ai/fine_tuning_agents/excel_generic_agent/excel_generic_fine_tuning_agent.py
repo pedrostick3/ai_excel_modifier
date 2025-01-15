@@ -4,10 +4,12 @@ import json
 import shutil
 import time
 from modules.ai.fine_tuning_agents.utils.training_file_generator.fine_tuning_training_file_generator import FinetuningTrainingFileGenerator
-from modules.ai.services.azure_ai_service import AzureAiService
+from modules.ai.services.ai_service import AiService
+from modules.ai.services.openai_ai_service import OpenAiAiService
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.enums.file_category import FileCategory
 from modules.ai.enums.ai_fine_tuning_job_status import AiFineTuningJobStatus
+from modules.ai.enums.ai_file_status import AiFileStatus
 import modules.excel.constants.excel_constants as excel_constants
 import constants.configs as configs
 import modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent_prompts as prompts
@@ -21,9 +23,11 @@ class ExcelGenericFinetuningAgent:
     fine_tuning_model = None
 
     def __init__(self,
-        ai_service: AzureAiService,
+        ai_service: OpenAiAiService,
         base_model: str,
         fine_tuning_model: str = None,
+        delete_fine_tuning_model: bool = False,
+        delete_fine_tuning_model_safety_trigger: bool = False,
         create_fine_tuning_model: bool = False,
         only_create_fine_tuning_model_if_not_exists: bool = True,
     ):
@@ -31,13 +35,41 @@ class ExcelGenericFinetuningAgent:
         Initialize the AI Agent.
 
         To create a fine-tuning model, the parameter 'create_fine_tuning_model' must be True and it's not necessary to pass the 'fine_tuning_model' parameter.
+
+        To delete a fine-tuning model, the parameters 'delete_fine_tuning_model' and 'delete_fine_tuning_model_safety_trigger' must be True and it's necessary to pass the 'fine_tuning_model' parameter.
         """
         self.ai_service = ai_service
         self.base_model = base_model
         self.fine_tuning_model = fine_tuning_model
+        if delete_fine_tuning_model and delete_fine_tuning_model_safety_trigger:
+            self.delete_fine_tuning_model(fine_tuning_model_to_delete=fine_tuning_model)
         if create_fine_tuning_model:
             self.create_fine_tuning_model(only_create_fine_tuning_model_if_not_exists=only_create_fine_tuning_model_if_not_exists)
     
+    def delete_fine_tuning_model(
+        self, 
+        fine_tuning_model_to_delete: str,
+        exit_to_delete_the_training_file_of_fine_tuning_model_in_the_web_interface: bool = True,
+    ) -> bool:
+        """
+        Delete the fine-tuning model.
+        You must have the Owner role in your organization to delete a model.
+        Notes:
+        - After deleting a model, you can't use it and recover it anymore.
+        - After deleting a model, the historical job data records will still show the model name, but the model won't be available for use. [Source](https://community.openai.com/t/how-to-delete-a-fine-tune-model-via-api/13831/12)
+        """
+        if fine_tuning_model_to_delete:
+            deleted_model = self.ai_service.get_ai_client().models.delete(fine_tuning_model_to_delete)
+            if deleted_model.deleted:
+                logging.info(f"ExcelGenericFinetuningAgent - delete_fine_tuning_model(): Fine-tuning model deleted. (fine_tuning_model_to_delete = {fine_tuning_model_to_delete})")
+                if exit_to_delete_the_training_file_of_fine_tuning_model_in_the_web_interface:
+                    logging.info("ExcelGenericFinetuningAgent - delete_fine_tuning_model(): You should delete the training file of the fine-tuning model in the respective AI Provider Web Interface.\nExiting...")
+                    exit()
+                return True
+        
+        logging.info(f"ExcelGenericFinetuningAgent - delete_fine_tuning_model(): No fine-tuning model to delete. (fine_tuning_model_to_delete = {fine_tuning_model_to_delete})")
+        return False
+
     def create_fine_tuning_model(
         self,
         generate_training_file: bool = True,
@@ -53,8 +85,9 @@ class ExcelGenericFinetuningAgent:
         if only_create_fine_tuning_model_if_not_exists:
             jobs = self.ai_service.get_ai_client().fine_tuning.jobs.list()
             logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Found {len(jobs.data)} fine-tuning jobs: {jobs.data}")
-            if len(jobs.data) > 0 and AiFineTuningJobStatus.is_succeed(jobs.data[0].status):
-                self.fine_tuning_model = jobs.data[0].fine_tuned_model
+            model_exists_and_is_succeed = any(self.fine_tuning_model == job.fine_tuned_model and AiFineTuningJobStatus.is_succeed(job.status) for job in jobs.data)
+            if len(jobs.data) > 0 and model_exists_and_is_succeed:
+                self.fine_tuning_model = next(job.fine_tuned_model for job in jobs.data if self.fine_tuning_model == job.fine_tuned_model and AiFineTuningJobStatus.is_succeed(job.status))
                 logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Fine-tuning model already exists: {self.fine_tuning_model}")
                 return self.fine_tuning_model
 
@@ -73,9 +106,9 @@ class ExcelGenericFinetuningAgent:
                 purpose="fine-tune", # Can't be "fine-tuning"
             )
             uploaded_file = self.ai_service.get_ai_client().files.retrieve(uploaded_file.id)
-            if not AiFineTuningJobStatus.has_finished(uploaded_file.status):
-                logging.info(f"Uploaded file {uploaded_file.id} not finished. Status: {training_job.status}. Waiting...")
-                while not AiFineTuningJobStatus.has_finished(uploaded_file.status): # É quase instantâneo
+            if not AiFileStatus.has_finished(uploaded_file.status):
+                logging.info(f"Uploaded file {uploaded_file.id} not finished. Status: {uploaded_file.status}. Waiting...")
+                while not AiFileStatus.has_finished(uploaded_file.status): # É quase instantâneo
                     time.sleep(1) # 1 second
                     uploaded_file = self.ai_service.get_ai_client().files.retrieve(uploaded_file.id)
         logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Uploaded file: {uploaded_file.model_dump_json(indent=2)}")
@@ -90,8 +123,9 @@ class ExcelGenericFinetuningAgent:
         if not AiFineTuningJobStatus.has_finished(training_job.status):
             logging.info(f"Training job {training_job.id} not finished. Status: {training_job.status}. Waiting...")
             while not AiFineTuningJobStatus.has_finished(training_job.status):
-                # It took 20m36s and billed 55k tokens to train with the "gpt-4o-mini" model and 11 examples.
-                # It took 21m57s and billed 55k tokens to train with the "gpt-4o-mini" model and 18 examples.
+                # Azure - It took 20m36s and billed 55k tokens to train with the "gpt-4o-mini" model and 11 examples.
+                # Azure - It took 21m57s and billed 55k tokens to train with the "gpt-4o-mini" model and 18 examples.
+                # OpenAI - It took 9m2s and billed 56825 tokens to train with the "gpt-4o-mini-2024-07-18" model and 18 examples.
                 time.sleep(5) # 5 seconds
                 training_job = self.ai_service.get_ai_client().fine_tuning.jobs.retrieve(training_job.id)
         training_time = time.time() - training_start_time
@@ -109,7 +143,7 @@ class ExcelGenericFinetuningAgent:
         self.fine_tuning_model = jobs.data[0].fine_tuned_model
 
         if exit_to_deploy_fine_tuning_model_in_azure_ai_foundry_web_interface:
-            logging.info("ExcelGenericFinetuningAgent - create_fine_tuning_model(): You must deploy the fine-tuning model in the Azure AI Foundry Web Interface.\nExiting...")
+            logging.info("ExcelGenericFinetuningAgent - create_fine_tuning_model(): If you're using Azure, you must deploy the fine-tuning model in the Azure AI Foundry Web Interface.\nExiting...")
             exit()
         return jobs.data[0].fine_tuned_model
 

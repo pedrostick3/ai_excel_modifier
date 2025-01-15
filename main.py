@@ -5,6 +5,7 @@ import constants.configs as configs
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.services.custom_ai_service import CustomAiService
 from modules.ai.services.azure_ai_service import AzureAiService
+from modules.ai.services.openai_ai_service import OpenAiAiService
 from modules.ai.agents.excel_categorizer_agent.excel_categorizer_agent import ExcelCategorizerAgent
 from modules.ai.agents.excel_header_finder_agent.excel_header_finder_agent import ExcelHeaderFinderAgent
 from modules.ai.agents.excel_pre_header_modifier_agent.excel_pre_header_modifier_agent import ExcelPreHeaderModifierAgent
@@ -22,8 +23,8 @@ from modules.analytics.services.ai_analytics import AiAnalytics
 CUSTOM_AI_SERVICE_BASE_URL = configs.GITHUB_BASE_URL
 CUSTOM_AI_SERVICE_KEY = configs.GITHUB_KEY
 CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
-AZURE_FINETUNING_BASE_MODEL = configs.AZURE_MODEL
-AZURE_FINETUNING_MODEL = configs.AZURE_FINE_TUNING_MODEL
+FINETUNING_BASE_MODEL = configs.OPENAI_FINE_TUNING_BASE_MODEL
+FINETUNING_MODEL = configs.OPENAI_FINE_TUNING_MODEL
 AI_TYPE = AiType.FINE_TUNING
 
 def main():
@@ -35,6 +36,7 @@ def main():
         #"Test_Execution_data Template_half.xlsx",
         #"Test_Execution_data Template_quarter.xlsx",
         #"Test_Execution_data Template_50rows.xlsx",
+        #"Test_Ai_Fine-tuning_Estimates_Investigation_Azure_vs_OpenAI.xlsx",
     ]
 
     # Configurar logs
@@ -47,20 +49,20 @@ def main():
     logger.info("A iniciar AI APP")
 
     if AI_TYPE == AiType.COMPLETION or AI_TYPE == AiType.COMPLETION_FUNCTION_CALLING:
-        # Configurar Custom AI Service
+        # Configurar AI Service
         ai_service = CustomAiService(CUSTOM_AI_SERVICE_KEY, CUSTOM_AI_SERVICE_BASE_URL)
 
     if AI_TYPE == AiType.FINE_TUNING:
-        # Configurar Azure AI Service para Fine Tuning
+        # Configurar Fine-Tuning AI Service
         fine_tuning_agent = ExcelGenericFinetuningAgent(
-            AzureAiService(),
-            base_model=AZURE_FINETUNING_BASE_MODEL,
-            fine_tuning_model=AZURE_FINETUNING_MODEL,
+            OpenAiAiService(),
+            base_model=FINETUNING_BASE_MODEL,
+            fine_tuning_model=FINETUNING_MODEL,
             create_fine_tuning_model=False,
         )
 
     if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH or AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
-        # Configurar Azure AI Service para Assistants
+        # Configurar Assistants AI Service
         ai_service = AzureAiService()
     
     os.makedirs(configs.OUTPUT_FOLDER, exist_ok=True) # Criar pasta de output se não existir
@@ -152,7 +154,6 @@ def main():
                     raise
 
                 logging.info("#1. 2. END - ExcelGenericFinetuningAgent")
-                exit()
             else:
                 # 1. Categorizar Excel
                 logging.info("#1. START - ExcelGenericFinetuningAgent")

@@ -286,13 +286,7 @@ Complicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,S
     },
     {
         "role": "assistant",
-        "content": f"""{{
-    "category": "{FileCategory.INVALIDO.value}",
-    "header": {{
-        "row_number": "1",
-        "row_content": "Template,Nome,Quota,Pivot,Sheet,NIF,Nsocio,SeparadorMilhar,SeparadorDecimal,Moeda,Remover linhas com,RemoverLinhaFinal,IgnorarLinhasSemValorDesconto,Taxa,MesReferencia"
-    }}
-}}""",
+        "content": f"""{{"category": "{FileCategory.INVALIDO.value}"}}""",
     },
 ]
 

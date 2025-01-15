@@ -100,7 +100,7 @@ class AiAnalytics:
 
                 for line in data_lines:
                     match = re.search(
-                        r"(\w+) - ai_model=([\w\-]+) CompletionUsage\(prompt_tokens=(\d+), completion_tokens=(\d+), total_tokens=(\d+)\) - Demorou ([\d\.]+s)",
+                        r"(\w+) - ai_model=([a-zA-Z0-9_\-:.]+) CompletionUsage\(prompt_tokens=(\d+), completion_tokens=(\d+), total_tokens=(\d+)\) - Demorou ([\d\.]+s)",
                         line,
                     )
                     if not match:
@@ -110,9 +110,21 @@ class AiAnalytics:
                     ai_model_for_pricing_calcs = None
 
                     if ai_model in pricings:
+                        model_type = "base-model"
                         ai_model_for_pricing_calcs = ai_model
+                    elif ai_model.startswith("ft:"):
+                        # OpenAI Example: ft:gpt-4o-mini-2024-07-18:inspireit::ApwmDPft
+                        model_type = "ft"
+                        base_model_used = ai_model.split(":")[1]  # gpt-4o-mini-2024-07-18
+                        components = base_model_used.split("-")
+                        try:
+                            base_model = "-".join(components[:-3]) # -3 = Exclude the api_version date
+                        except ValueError:
+                            model_type = None
+                            base_model = None
                     else:
-                        components = ai_model.split("-") # Example: gpt-4o-mini-2024-07-18-ft-bf955afee8a8468d90d7a50a5887c450
+                        # Azure Example: gpt-4o-mini-2024-07-18-ft-bf955afee8a8468d90d7a50a5887c450
+                        components = ai_model.split("-")
                         try:
                             ft_index = components.index("ft")
                             model_type = components[ft_index]
@@ -121,10 +133,10 @@ class AiAnalytics:
                             model_type = None
                             base_model = None
 
-                        # Check if type is 'ft' (fine-tuning)
-                        if model_type == "ft":
-                            fine_tuning_key = f"{base_model}_fine-tuning"
-                            ai_model_for_pricing_calcs = fine_tuning_key if fine_tuning_key in pricings else None
+                    # Check if type is 'ft' (fine-tuning)
+                    if model_type == "ft":
+                        fine_tuning_key = f"{base_model}_fine-tuning"
+                        ai_model_for_pricing_calcs = fine_tuning_key if fine_tuning_key in pricings else None
 
                     if ai_model_for_pricing_calcs is None:
                         raise ValueError(f"O modelo AI '{ai_model}' convertido para a key '{ai_model_for_pricing_calcs}' não foi encontrado nas configurações de preços.")
