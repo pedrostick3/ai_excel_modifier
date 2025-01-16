@@ -32,6 +32,7 @@ class AiService(object):
         temperature: float = 1,
         top_p: float = 1,
         tools: list[dict] = None,
+        tool_choice: str = None,
         base_model: str = None,
         ai_analytics_file_name: str = None,
         ai_analytics_agent_name: str = None,
@@ -52,6 +53,7 @@ class AiService(object):
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
             top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
             tools (list[dict]): The tools to be used.
+            tool_choice (str): Force the function calling by setting the tool choice to "required". [Source](https://community.openai.com/t/new-api-feature-forcing-function-calling-via-tool-choice-required/731488) 
             base_model (str): The base model to be used in the Tokenizer.
             ai_analytics_file_name (str): The AI analytics file name to be used.
             ai_analytics_agent_name (str): The AI analytics agent name to be used.

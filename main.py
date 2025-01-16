@@ -74,45 +74,35 @@ def main():
 
         if AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
             # TODO: Not tested yet
-            ##### Teste Code Interpreter - START #####
-            # Somar colunas indicadas pelo user
             logging.info("#ASSISTANT_CODE_INTERPRETER - START - CodeInterpreterAgent")
             code_interpreter_agent_response = CodeInterpreterAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
                 column_to_sum="RunTimeSeconds",
                 input_excel_file_path=file_path,
                 ai_analytics_file_name=os.path.basename(file_path),
             )
-            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {code_interpreter_agent_response}")
+            logging.info(f"The 'RunTimeSeconds' column sum is: {code_interpreter_agent_response}")
             logging.info("#ASSISTANT_CODE_INTERPRETER - END - CodeInterpreterAgent")
-            ##### Teste Code Interpreter - END #####
             continue
 
         if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH:
             # TODO: Not tested yet
-            ##### Teste File Search - START #####
-            # Somar colunas indicadas pelo user
             logging.info("#ASSISTANT_FILE_SEARCH - START - FileSearchAgent")
             file_search_agent_response = FileSearchAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
                 column_to_sum="RunTimeSeconds",
                 input_excel_file_path=file_path,
                 ai_analytics_file_name=os.path.basename(file_path),
             )
-            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {file_search_agent_response}")
+            logging.info(f"The 'RunTimeSeconds' column sum is: {file_search_agent_response}")
             logging.info("#ASSISTANT_FILE_SEARCH - END - FileSearchAgent")
-            ##### Teste File Search - END #####
             continue
 
         if AI_TYPE == AiType.COMPLETION_FUNCTION_CALLING:
-            logging.info("#COMPLETION_FUNCTION_CALLING - START - ExcelHeaderFinderAgent (getting excel_header_row_index)")
             excel_header_finder_agent_response_row_content = ExcelHeaderFinderAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).get_row_content(
                 excel_file_path=file_path,
                 ai_analytics_file_name=os.path.basename(file_path),
             )
             excel_header_row_index = ExcelService.get_excel_csv_row_number(file_path, excel_header_finder_agent_response_row_content) - 1
-            logging.info("#COMPLETION_FUNCTION_CALLING - END - ExcelHeaderFinderAgent (getting excel_header_row_index)")
 
-            ##### Teste Function Calls - START #####
-            # Somar colunas indicadas pelo user
             logging.info("#COMPLETION_FUNCTION_CALLING - START - ExcelSumColumnsAgent")
             function_call_agent_response = ExcelSumColumnsAgent(ai_service, CUSTOM_AI_SERVICE_MODEL).do_your_work_with(
                 column_to_sum="RunTimeSeconds",
@@ -120,14 +110,12 @@ def main():
                 excel_header_row_index=excel_header_row_index,
                 ai_analytics_file_name=os.path.basename(file_path),
             )
-            logging.info(f"A soma da coluna 'RunTimeSeconds' é: {function_call_agent_response}")
+            logging.info(f"The 'RunTimeSeconds' column sum is: {function_call_agent_response}")
             logging.info("#COMPLETION_FUNCTION_CALLING - END - ExcelSumColumnsAgent")
-            ##### Teste Function Calls - END #####
             continue
 
         if AI_TYPE == AiType.FINE_TUNING:
-            ##### Teste Fine Tuning - START #####
-            if AiType.FINE_TUNING.value["MERGE_CATEGORIZER_AND_HEADER_FINDER_IN_1_REQUEST"]:
+            if AiType.FINE_TUNING.value["USE_CATEGORIZER_AND_HEADER_FINDER_IN_1_REQUEST"]:
                 # 1. 2. Categorizar Excel e perceber onde começa a tabela retornando a linha do cabeçalho
                 logging.info("#1. 2. START - ExcelGenericFinetuningAgent")
                 file_category_and_header = fine_tuning_agent.get_file_category_and_header(
@@ -191,31 +179,33 @@ def main():
 
             header_row_number = ExcelService.get_excel_csv_row_number(output_file_path, excel_header)
 
-            # 4. Modificar Excel a partir do cabeçalho
-            logging.info("#4. START - ExcelGenericFinetuningAgent")
-            
-            # TODO: Parte 4 é a mais importante. Testar:
-            # TODO (continuação): - 1º retorna código a correr de acordo com o tipo/categoria do file;
-            # TODO (continuação): - 2º enviar o conteudo do ficheiro inteiro e transforma o conteudo para o que estamos à espera;
-            # TODO (continuação): - 3º utilizando as FunctionCalls, retorna a função a correr de acordo com o tipo/categoria do file; (será a mais infalivel)
-            # TODO: Testes Extras:
-            # TODO (continuação): - Fazer apenas 1 pedido com todos os steps numa única prompt
-            # TODO (continuação): - Fazer testes com vários tamanhos de ficheiros (e meio desorganizados)
+            # 4. Modificar Excel depois do cabeçalho
+            if AiType.FINE_TUNING.value["USE_FUNCTION_CALLING_TO_MODIFY_CONTENT"]:
+                logging.info("#4. START - ExcelGenericFinetuningAgent - modify_content_returning_function_calling()")
+                
+                fine_tuning_agent.modify_content_returning_function_calling(
+                    category=file_category,
+                    input_excel_file_path=output_file_path,
+                    output_excel_file_path=output_file_path,
+                    excel_header_row_index=header_row_number - 1, # -1 para obter o index
+                    ai_analytics_file_name=os.path.basename(file_path),
+                )
+                
+                # TODO: Testes Extras:
+                # TODO (continuação): - Fazer testes com vários ficheiros (e meio desorganizados)
+                # TODO (continuação): - Fazer apenas 1 pedido com todos os steps numa única prompt
 
-            # TODO [PD]: Testes a realizar com a conta da Azure (com subscrição pay-as-you-go):
-            # TODO [PD]: - Fine-Tuning (AI_TYPE == AiType.FINE_TUNING);
-            # TODO [PD]: - File Search (AI_TYPE == AiType.ASSISTANT_FILE_SEARCH);
-            # TODO [PD]: - Code Interpreter (AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER);
-
-            fine_tuning_agent.modify_content(
-                category=file_category,
-                input_excel_file_path=output_file_path,
-                output_excel_file_path=output_file_path,
-                excel_header_row_index=header_row_number - 1, # -1 para obter o index
-                ai_analytics_file_name=os.path.basename(file_path),
-            )
-            logging.info("#4. END - ExcelGenericFinetuningAgent")
-            ##### Teste Fine Tuning - END #####
+                logging.info("#4. END - ExcelGenericFinetuningAgent - modify_content_returning_function_calling()")
+            else:
+                logging.info("#4. START - ExcelGenericFinetuningAgent - modify_content_returning_code()")
+                fine_tuning_agent.modify_content_returning_code(
+                    category=file_category,
+                    input_excel_file_path=output_file_path,
+                    output_excel_file_path=output_file_path,
+                    excel_header_row_index=header_row_number - 1, # -1 para obter o index
+                    ai_analytics_file_name=os.path.basename(file_path),
+                )
+                logging.info("#4. END - ExcelGenericFinetuningAgent - modify_content_returning_code()")
             continue
 
         if AI_TYPE == AiType.COMPLETION:

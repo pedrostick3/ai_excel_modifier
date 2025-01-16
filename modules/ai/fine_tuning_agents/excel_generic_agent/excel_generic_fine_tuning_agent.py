@@ -13,6 +13,7 @@ from modules.ai.enums.ai_file_status import AiFileStatus
 import modules.excel.constants.excel_constants as excel_constants
 import constants.configs as configs
 import modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent_prompts as prompts
+from modules.ai.function_calls_agent.enums.functions_to_call import FunctionsToCall
 
 
 
@@ -151,6 +152,8 @@ class ExcelGenericFinetuningAgent:
         self,
         user_prompt: str,
         system_prompt: str,
+        tools: list[dict] = None,
+        tool_choice: str = None,
         ai_analytics_file_name: str = None,
         log_messages: bool = True,
     ) -> str:
@@ -159,6 +162,8 @@ class ExcelGenericFinetuningAgent:
 
         Args:
             user_prompt (str): The user prompt to be used.
+            tools (list[dict]): The tools to be used.
+            tool_choice (str): Force the function calling by setting the tool choice to "required". [Source](https://community.openai.com/t/new-api-feature-forcing-function-calling-via-tool-choice-required/731488) 
             ai_analytics_file_name (str): The AI analytics file name to be used.
             log_messages (bool): Flag to indicate if the request messages should be logged.
 
@@ -171,6 +176,8 @@ class ExcelGenericFinetuningAgent:
                 base_model=self.base_model,
                 first_user_prompt=user_prompt,
                 system_prompt=system_prompt,
+                tools=tools,
+                tool_choice=tool_choice,
                 use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
                 response_format=None,
                 ai_analytics_file_name=ai_analytics_file_name,
@@ -386,7 +393,7 @@ Filename = '{file_name}'
             logging.error(f"Erro ao processar o retorno do AI ExcelGenericFinetuningAgent: {e}")
             raise
 
-    def modify_content(
+    def modify_content_returning_code(
         self,
         category: FileCategory,
         input_excel_file_path: str,
@@ -395,8 +402,7 @@ Filename = '{file_name}'
         ai_analytics_file_name: str = None,
     ) -> None:
         """
-        Processes an Excel file by splitting it into parts if it exceeds a specified number of lines,
-        sends each part to an AI service for modification, and saves the modified content back to the file.
+        Make AI return the code to modify the content of the Excel file.
 
         Args:
             category (FileCategory): The category of the file.
@@ -435,4 +441,71 @@ excel_header_row_index = {excel_header_row_index}""",
             exec(python_code, globals())
         except Exception as e:
             logging.error(f"AI ExcelGenericFinetuningAgent: Error running the AI python code: {e}")
+            raise
+    
+    def modify_content_returning_function_calling(
+        self,
+        category: FileCategory,
+        input_excel_file_path: str,
+        output_excel_file_path: str,
+        excel_header_row_index: int,
+        ai_analytics_file_name: str = None,
+    ) -> None:
+        """
+        Make AI return the function to call that modifies the content of the Excel file.
+
+        Args:
+            category (FileCategory): The category of the file.
+            excel_input_file_path (str): The path to the Excel file to be processed.
+            excel_output_file_path (str): The path to the Excel file to be saved.
+            excel_header_row_index (int): The row index of the header in the Excel file.
+            ai_analytics_file_name (str, optional): The AI analytics file name to be used. Defaults to None.
+
+        Returns:
+            None
+        """
+        try:
+            excel_data = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path)
+        except Exception as e:
+            logging.error(f"AI ExcelGenericFinetuningAgent: Error reading Excel file: {e}")
+            raise
+
+        excel_lines = excel_data.split(excel_constants.EXCEL_LINE_BREAK)
+        excel_lines_count = len(excel_lines) - 1
+        logging.info(f"AI ExcelGenericFinetuningAgent - {category} - The file '{input_excel_file_path}' has {excel_lines_count} lines.")
+        
+        try:
+            ai_response = self.ask_ai(
+                system_prompt=prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
+                user_prompt=f"""Return the function to call that modifies the content of the following file that belongs to the '{category.value}' category:
+input_excel_file_path = '{input_excel_file_path}'
+output_excel_file_path = '{output_excel_file_path}'
+excel_header_row_index = {excel_header_row_index}""",
+                ai_analytics_file_name=ai_analytics_file_name,
+                tool_choice="required",
+                tools=[
+                    *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_EXECUTION_CATEGORY.value["tools"],
+                    *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_TEST_EXECUTION_CATEGORY.value["tools"],
+                ],
+            )
+        except Exception as e:
+            logging.error(f"AI ExcelGenericFinetuningAgent: Error communicating with AI: {e}")
+            raise
+
+        try:
+            response_json = json.loads(ai_response)
+        except json.JSONDecodeError:
+            logging.error(f"AI ExcelGenericFinetuningAgent: Error parsing AI response JSON: {ai_response}")
+            raise
+        
+        if "function" not in response_json:
+            logging.error(f"AI ExcelGenericFinetuningAgent: The AI response JSON does not contain the 'function' key. ai_response = {ai_response}")
+            raise
+
+        try:
+            FunctionsToCall.get_enum_by_function_name(response_json["function"]["name"]).run_function_from_ai_response(
+                str_dict_func_args=response_json["function"]["arguments"],
+            )
+        except json.JSONDecodeError:
+            logging.error(f"AI ExcelGenericFinetuningAgent: Error executing function. response_json: {response_json}")
             raise

@@ -95,7 +95,7 @@ class ExcelSumColumnsAgent:
             header_row_index=excel_header_row_index,
         )
         try:
-            reponse = self.ask_ai(
+            response = self.ask_ai(
                 user_role_request_prompt=f"Need to sum the column {column_to_sum} that has the following values: {column_values}",
                 ai_analytics_file_name=ai_analytics_file_name,
             )
@@ -104,9 +104,9 @@ class ExcelSumColumnsAgent:
             raise
 
         try:
-            response_json = json.loads(reponse)
+            response_json = json.loads(response)
         except json.JSONDecodeError:
-            logging.error(f"AI ExcelSumColumnsAgent: Error parsing AI response JSON: {reponse}")
+            logging.error(f"AI ExcelSumColumnsAgent: Error parsing AI response JSON: {response}")
             raise
         
         if "function" not in response_json or response_json["function"]["name"] != "sum_column":
