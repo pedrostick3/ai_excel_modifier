@@ -7,8 +7,8 @@ When someone asks to categorize a file, your task is to return only the category
 1.2. If the filename contains 'Test_Execution_data', then it belongs to the '{FileCategory.TESTE_EXECUCAO.value}' category and ignore the rest of the rules;
 1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;
 2. Content categorization:
-2.1. If the file has a blank first line and then the columns 'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds', then category is '{FileCategory.EXECUCAO.value}'.
-2.2. If the file has in column A line 1 the label 'Test execution', in column A line 2 the label 'Total run time' and in list 4 the columns 'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds', then category is '{FileCategory.TESTE_EXECUCAO.value}'.
+2.1. If the file has a blank first line and in the second line must have the exact columns 'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds', then category is '{FileCategory.EXECUCAO.value}'.
+2.2. If the file has in column A line 1 the label 'Test execution', in column A line 2 the label 'Total run time' and in line 4 must have the exact columns 'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds', then category is '{FileCategory.TESTE_EXECUCAO.value}'.
 2.3. If the file does not comply with the indicated cases, then category is '{FileCategory.INVALIDO.value}'.
 
 Additional rules:
@@ -76,6 +76,75 @@ AqueleGrande,Nome,Quota SAMS sócio,A1,Sheet1,Nº identif.fiscal,Número de sóc
 CA Coimbra,Nome ,Valor do Desconto,A3,Folha1,NIF,,,.,,,,,,
 CA Generico,NOME,QUOTA,A8,Mapa,,Nº SÓCIO SINDICATO,",",.,€,Total,Sim,,,
 Complicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,Sim,,
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_PROMPTS_CATEGORY_INVALIDO_1 = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize the following file:
+Filename = 'E_unnamed_inv.xlsx'
+```csv
+,,,,,,
+ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,1,20,20
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,1,146,146
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,1,33,33
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_PROMPTS_CATEGORY_INVALIDO_2 = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize the following file:
+Filename = 'TE_unnamed_inv.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,
+Total run time,3910,,,,,
+,,,,,,
+ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,AverageRunTimeSeconds
+153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,20
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_PROMPTS_CATEGORY_INVALIDO_3 = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize the following file:
+Filename = 'file-73.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,,
+Total run time,3910,,,,,,
+,,,,,,,
+ExecutionId,IsSuccessful,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+153,1,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
 ```""",
     },
     {
@@ -194,8 +263,8 @@ When someone asks to categorize a file and find the header of a table, your task
 1.2. If the filename contains 'Test_Execution_data', then it belongs to the '{FileCategory.TESTE_EXECUCAO.value}' category and ignore the next '2.' step;
 1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;
 2. Content categorization:
-2.1. If the file has a blank first line and then the columns 'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds', then category is '{FileCategory.EXECUCAO.value}'.
-2.2. If the file has in column A line 1 the label 'Test execution', in column A line 2 the label 'Total run time' and in list 4 the columns 'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds', then category is '{FileCategory.TESTE_EXECUCAO.value}'.
+2.1. If the file has a blank first line and in the second line must have the exact columns 'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds', then category is '{FileCategory.EXECUCAO.value}'.
+2.2. If the file has in column A line 1 the label 'Test execution', in column A line 2 the label 'Total run time' and in line 4 must have the exact columns 'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds', then category is '{FileCategory.TESTE_EXECUCAO.value}'.
 2.3. If the file does not comply with the indicated cases, then category is '{FileCategory.INVALIDO.value}'.
 
 Additional rules:
@@ -286,7 +355,76 @@ Complicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,S
     },
     {
         "role": "assistant",
-        "content": f"""{{"category": "{FileCategory.INVALIDO.value}"}}""",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_1 = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'E_unnamed_inv.xlsx'
+```csv
+,,,,,,
+ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,1,20,20
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,1,146,146
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,1,33,33
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_2 = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'TE_unnamed_inv.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,
+Total run time,3910,,,,,
+,,,,,,
+ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,AverageRunTimeSeconds
+153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,20
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_3 = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'file-73.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,,
+Total run time,3910,,,,,,
+,,,,,,,
+ExecutionId,IsSuccessful,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+153,1,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
     },
 ]
 

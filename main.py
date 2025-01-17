@@ -28,15 +28,26 @@ FINETUNING_MODEL = configs.OPENAI_FINE_TUNING_MODEL
 AI_TYPE = AiType.FINE_TUNING
 
 def main():
-    # Ficheiros para o PoC3
+    # PoC3 Files to process
     input_files = [
+        ###### Main Files:
         "Execution_data Template.xlsx",
         "ParameterizationFile_testes_13112024.xlsx",
         "Test_Execution_data Template.xlsx",
+        ###### Test Files (Test_Execution category):
         #"Test_Execution_data Template_half.xlsx",
         #"Test_Execution_data Template_quarter.xlsx",
         #"Test_Execution_data Template_50rows.xlsx",
-        #"Test_Ai_Fine-tuning_Estimates_Investigation_Azure_vs_OpenAI.xlsx",
+        #"TE_unnamed.xlsx",
+        ###### Test Files (Execution category):
+        #"E_unnamed.xlsx",
+        ###### Test Files (Invalid category):
+        #"E_unnamed_inv.xlsx",
+        #"file-3.xlsx",
+        #"TE_unnamed_inv.xlsx",
+        #"file-73.xlsx",
+        #"id-24543.xlsx",
+        #"Ai_Fine-tuning_Estimates_Investigation_Azure_vs_OpenAI.xlsx",
     ]
 
     # Configurar logs
@@ -55,10 +66,13 @@ def main():
     if AI_TYPE == AiType.FINE_TUNING:
         # Configurar Fine-Tuning AI Service
         fine_tuning_agent = ExcelGenericFinetuningAgent(
-            OpenAiAiService(),
+            ai_service=OpenAiAiService(),
             base_model=FINETUNING_BASE_MODEL,
             fine_tuning_model=FINETUNING_MODEL,
-            create_fine_tuning_model=False,
+            #delete_fine_tuning_model=True,
+            #delete_fine_tuning_model_safety_trigger=True,
+            #create_fine_tuning_model=True,
+            #force_rewrite_training_file=True,
         )
 
     if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH or AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
