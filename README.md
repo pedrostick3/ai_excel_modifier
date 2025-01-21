@@ -35,30 +35,31 @@ models=openai.models.list()
 print(f"######## Modelos disponíveis: {models}")
 ```
 
-### Modelos disponíveis para o plano Free da API da OpenAI:
-- **dall-e-2** (created: 1698798177 (01/11/2023), owned by: system)
-- **whisper-1** (created: 1677532384 (27/02/2023), owned by: openai-internal)
-- **gpt-3.5-turbo-instruct** (created: 1692901427 (24/08/2023) , owned by: system)
-- **gpt-3.5-turbo** (created: 1677610602 (28/02/2023), owned by: openai)
-- **gpt-3.5-turbo-0125** (created: 1706048358 (23/01/2024), owned by: system)
-- **babbage-002** (created: 1692634615 (21/08/2023), owned by: system)
-- **davinci-002** (created: 1692634301 (21/08/2023), owned by: system)
-- **dall-e-3** (created: 1698785189 (31/10/2023), owned by: system)
-- **gpt-3.5-turbo-16k** (created: 1683758102 (10/05/2023), owned by: openai-internal)
-- **tts-1-hd-1106** (created: 1699053533 (03/11/2023), owned by: system)
-- **text-embedding-ada-002** (created: 1671217299 (16/12/2022), owned by: openai-internal)
-- **text-embedding-3-small** (created: 1705948997 (22/01/2024), owned by: system)
-- **text-embedding-3-large** (created: 1705953180 (22/01/2024), owned by: system)
-- **tts-1-hd** (created: 1699046015 (03/11/2023), owned by: system)
-- **gpt-3.5-turbo-1106** (created: 1698959748 (02/11/2023), owned by: system)
-- **gpt-4o-mini-2024-07-18** (created: 1721172717 (16/07/2024), owned by: system)
-- **gpt-4o-mini** (created: 1721172741 (16/07/2024), owned by: system)
-- **tts-1** (created: 1681940951 (19/04/2023), owned by: openai-internal)
-- **tts-1-1106** (created: 1699053241 (03/11/2023), owned by: system)
-- **gpt-3.5-turbo-instruct-0914** (created: 1694122472 (07/09/2023), owned by: system)
+### Tested Models:
+- **o1-preview**
+- **o1-mini**
+- **gpt-4o**
+- **gpt-4o-mini (most used since it's the best option for this PoC comparing cost & quality)**
 
-### Prompts utilizadas:
+### Agent Prompts:
 - **ExcelCategorizerAgent**: modules/ai/agents/excel_categorizer_agent/excel_categorizer_agent_prompts.py
 - **ExcelHeaderFinderAgent**: modules/ai/agents/excel_header_finder_agent/excel_header_finder_agent_prompts.py
 - **ExcelPreHeaderModifierAgent**: modules/ai/agents/excel_pre_header_modifier_agent/excel_pre_header_modifier_agent_prompts.py
 - **ExcelContentModifierAgent**: modules/ai/agents/excel_content_modifier_agent/excel_content_modifier_agent_prompts.py
+- **ExcelGenericContentModifierAgent**: modules/ai/agents/excel_generic_content_modifier_agent/excel_generic_content_modifier_agent_code_prompts.py
+- **CodeInterpreterAgent (not tested yet)**: modules/ai/code_interpreter_agent/code_interpreter_agent/code_interpreter_agent.py
+- **FileSearchAgent (not tested yet)**: modules/ai/file_search_agent/file_search_agent/file_search_agent.py
+- **ExcelSumColumnsAgent**: modules/ai/function_calls_agent/excel_sum_columns_agent/excel_sum_columns_agent.py
+- **ExcelGenericFineTuningAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/excel_generic_fine_tuning_agent_prompts.py
+
+### AI Services & Utils:
+- **AzureAiService**: modules/ai/services/azure_ai_service.py
+- **OpenAiAiService**: modules/ai/services/openai_ai_service.py
+- **CustomAiService**: modules/ai/services/custom_ai_service.py
+- **TokenUtils**: modules/ai/utils/token_utils.py
+
+### Excel Services:
+- **ExcelService**: modules/excel/services/excel_service.py
+
+### AiAnalytics Services:
+- **AiAnalytics**: modules/analytics/services/ai_analytics.py
