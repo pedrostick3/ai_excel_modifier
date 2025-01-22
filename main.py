@@ -130,7 +130,7 @@ def main():
 
         if AI_TYPE == AiType.FINE_TUNING:
             if AiType.FINE_TUNING.value["USE_CATEGORIZER_AND_HEADER_FINDER_IN_1_REQUEST"]:
-                # 1. 2. Categorizar Excel e perceber onde começa a tabela retornando a linha do cabeçalho
+                # 1. 2. Categorizar Excel & perceber onde começa a tabela retornando a linha do cabeçalho
                 logging.info("#1. 2. START - ExcelGenericFinetuningAgent")
                 file_category_and_header = fine_tuning_agent.get_file_category_and_header(
                     excel_file_path=file_path,
@@ -205,10 +205,6 @@ def main():
                     ai_analytics_file_name=os.path.basename(file_path),
                 )
                 
-                # TODO: Testes Extras:
-                # TODO (continuação): - Fazer testes com vários ficheiros (e meio desorganizados)
-                # TODO (continuação): - Fazer apenas 1 pedido com todos os steps numa única prompt
-
                 logging.info("#4. END - ExcelGenericFinetuningAgent - modify_content_returning_function_calling()")
             else:
                 logging.info("#4. START - ExcelGenericFinetuningAgent - modify_content_returning_code()")

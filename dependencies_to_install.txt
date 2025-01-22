@@ -1,8 +1,7 @@
 pandas
 openpyxl
-requests
 openai
-aiohttp
+tiktoken
 azure-identity
 azure-ai-projects
 azure-ai-inference

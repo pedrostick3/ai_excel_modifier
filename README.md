@@ -26,13 +26,13 @@ Run the application on F5 (run button) or:
 python main.py
 ```
 
-Como saber quais os modelos disponiveis:
+Check available OpenAI models:
 ```python
 import openai
 openai.api_key = "OPENAI_API_KEY"
 
 models=openai.models.list()
-print(f"######## Modelos disponíveis: {models}")
+print(f"Available Models: {models}")
 ```
 
 ### Tested Models:
@@ -63,3 +63,9 @@ print(f"######## Modelos disponíveis: {models}")
 
 ### AiAnalytics Services:
 - **AiAnalytics**: modules/analytics/services/ai_analytics.py
+
+### Python Project Modules:
+- **ai**: Module responsible for handling everything related to AI;
+- **analytics**: Module responsible for analyzing the AI Agents behavior;
+- **excel**: Module responsible for processing excel files;
+- **uipath_incorporation**: Independent module developed to test the [incorporation](https://youtu.be/Zar8wrhT0Dk?si=cCyvklLRAEGq7eOU) of the python project into UiPath Activities;
