@@ -30,11 +30,11 @@ class OpenAiAiService:
         self,
         model: str,
         first_user_prompt: str,
-        system_prompt: str | None = None,
-        example_prompts: list[dict[str, str]] | None = None,
+        system_prompt: str = None,
+        example_prompts: list[dict[str, str]] = None,
         continuous_user_conversation_prompt: str = None,
         use_assistant_instead_of_system: bool = False,
-        response_format: None | dict = {"type": "json_object"},
+        response_format: dict = {"type": "json_object"},
         temperature: float = 1,
         top_p: float = 1,
         tools: list[dict] = None,
@@ -51,11 +51,11 @@ class OpenAiAiService:
         Args:
             model (str): The model to be used.
             first_user_prompt (str): The first user prompt to be used.
-            system_prompt (str | None): The system prompt to be used.
-            example_prompts (list[dict[str, str]] | None): The example prompts to be used.
+            system_prompt (str): The system prompt to be used.
+            example_prompts (list[dict[str, str]]): The example prompts to be used.
             continuous_user_conversation_prompt (str): The continuous user conversation message to be used.
             use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system. "o1-preview" and "o1-mini" models require this parameter to be True.
-            response_format (None | dict): The response format to be used.
+            response_format (dict): The response format to be used.
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
             top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
             tools (list[dict]): The tools to be used.

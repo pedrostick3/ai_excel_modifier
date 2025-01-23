@@ -32,9 +32,6 @@ def get_excel_csv_to_csv_str(excel_file_path: str, only_get_first_rows: int = No
         if only_get_first_rows is not None and only_get_first_rows > 0:
             dataFrame = dataFrame.head(only_get_first_rows)
 
-        # Remove columns with "Unnamed" in the header
-        # dataFrame.columns = [col if 'Unnamed' not in col else '' for col in dataFrame.columns]
-        
         return dataFrame.to_csv(index=False, header=False)
     except Exception as e:
         print(f"Error reading the excel file: {e}")

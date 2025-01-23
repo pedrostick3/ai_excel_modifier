@@ -51,13 +51,13 @@ def main():
     ]
 
     # Configurar logs
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.FileHandler("process.log", encoding='utf-8'), logging.StreamHandler()],
-    )
-    logger = logging.getLogger(__name__)
-    logger.info("A iniciar AI APP")
+    if not logging.getLogger().hasHandlers():
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler("process.log", encoding='utf-8'), logging.StreamHandler()],
+        )
+    logging.info("A iniciar AI APP")
 
     if AI_TYPE == AiType.COMPLETION or AI_TYPE == AiType.COMPLETION_FUNCTION_CALLING:
         # Configurar AI Service

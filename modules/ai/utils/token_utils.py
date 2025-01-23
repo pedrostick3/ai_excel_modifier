@@ -6,8 +6,7 @@ class TokenUtils:
     OPENAI_MODEL_TOKEN_LIMITS: Dict[str, int] = {
         "o1-preview": 128000,
         "o1-mini": 128000,
-        "gpt-4o": 16000, # GitHub 8k + 8k = 16k tokens
-        #"gpt-4o": 128000,
+        "gpt-4o": 128000,
         "gpt-4o-mini": 128000,
         "gpt-4o-mini-2024-07-18": 128000,
         "gpt-4": 8192,

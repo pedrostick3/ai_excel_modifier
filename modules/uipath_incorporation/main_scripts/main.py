@@ -16,13 +16,13 @@ def runExcelAiAgentWith(
     output_folder_path: str = "./assets/docs_output",
 ) -> bool:
     # Configurar logs
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.FileHandler("process.log", encoding='utf-8'), logging.StreamHandler()],
-    )
-    logger = logging.getLogger(__name__)
-    logger.info("Starting...")
+    if not logging.getLogger().hasHandlers():
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler("process.log", encoding='utf-8'), logging.StreamHandler()],
+        )
+    logging.info("Starting...")
 
     # Configurar Fine-Tuning AI Service
     fine_tuning_agent = ExcelFinetuningAgent(
