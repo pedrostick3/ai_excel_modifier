@@ -1,17 +1,21 @@
-Crate .env folder for virtual environment:
+Crate .venv folder for virtual environment:
 
 ```bash
-python -m venv .env
+python -m venv .venv
+```
+OR
+```bash
+python3.9 -m venv .venv
 ```
 
 Activate virtual environment:
 
 ```bash
-source .env/bin/activate
+source .venv/bin/activate
 ```
 OR
 ```bash
-.env/Scripts/activate
+.venv/Scripts/activate
 ```
 
 Install dependencies:
@@ -19,11 +23,27 @@ Install dependencies:
 ```bash
 pip install -r dependencies_to_install.txt
 ```
+OR
+```bash
+python3.9 -m pip install -r dependencies_to_install.txt
+```
+OR
+```bash
+.venv/Scripts/python.exe -m pip install -r dependencies_to_install.txt
+```
 
 Run the application on F5 (run button) or:
 
 ```bash
 python main.py
+```
+OR
+```bash
+python3.9 main.py
+```
+OR
+```bash
+.venv/Scripts/python.exe main.py
 ```
 
 Check available OpenAI models:
