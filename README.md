@@ -91,4 +91,4 @@ print(f"Available Models: {models}")
 - **uipath_incorporation**: Independent module developed to test the [incorporation](https://youtu.be/Zar8wrhT0Dk?si=cCyvklLRAEGq7eOU) of the python project into UiPath Activities;
 
 ### Python version used:
-- **Python 3.11.5** - you can check it by running `python --version` in your terminal
+- **Python 3.12.0** - you can check it by running `python --version` in your terminal

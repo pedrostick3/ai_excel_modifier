@@ -73,4 +73,4 @@ print(f"Available Models: {models}")
 - **AiAnalytics**: modules/analytics/services/ai_analytics.py
 
 ### Python version used for UiPath compatibility:
-- **Python 3.9** - you can check it by running `python --version` in your terminal
+- **Python 3.12.0** - you can check it by running `python --version` in your terminal
