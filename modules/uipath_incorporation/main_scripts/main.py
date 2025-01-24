@@ -14,9 +14,10 @@ def runExcelAiAgentWith(
     openai_api_key: str,
     input_excel_file_path: str,
     output_folder_path: str = "./assets/docs_output",
+    is_to_log: bool = True,
 ) -> bool:
     # Configurar logs
-    if not logging.getLogger().hasHandlers():
+    if is_to_log and not logging.getLogger().hasHandlers():
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
