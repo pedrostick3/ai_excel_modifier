@@ -16,9 +16,13 @@ class FinetuningTrainingFileGenerator:
     # Dados a serem convertidos para JSONL
     all_poc3_prompt_data = [
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_EXECUCAO_CASE_INSENSITIVE},
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE},
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_TESTE_EXECUCAO_CASE_INSENSITIVE},
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE},
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_INVALIDO},
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_INVALIDO_1},
         {"messages": excel_categorizer_agent_prompts.CATEGORIZER_PROMPTS_CATEGORY_INVALIDO_2},
@@ -26,10 +30,14 @@ class FinetuningTrainingFileGenerator:
         {"messages": excel_header_finder_agent_prompts.HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO},
         {"messages": excel_header_finder_agent_prompts.HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_CASE_INSENSITIVE},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_HEADER},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_CASE_INSENSITIVE},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_HEADER},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO},
         {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_1},
@@ -42,12 +50,33 @@ class FinetuningTrainingFileGenerator:
         {"messages": excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_PROMPTS_CATEGORY_EXECUCAO},
         {"messages": excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
     ]
+    
+    clean_poc3_prompt_data = [
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_CASE_INSENSITIVE},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_HEADER},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_CASE_INSENSITIVE},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_HEADER},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_1},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_2},
+        {"messages": excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_3},
+        {"messages": excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+        {"messages": excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_PROMPTS_CATEGORY_EXECUCAO},
+        {"messages": excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_PROMPTS_CATEGORY_TESTE_EXECUCAO},
+    ]
 
     training_file = "./modules/ai/fine_tuning_agents/utils/training_file_generator/generated_training_files/excel_fine_tuning_data.jsonl"
 
     @staticmethod
     def generate_training_file(
-        data: dict = all_poc3_prompt_data,
+        data: dict = clean_poc3_prompt_data,
         force_rewrite: bool = False,
     ) -> None:
         """

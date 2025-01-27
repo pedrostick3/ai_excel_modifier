@@ -54,7 +54,7 @@ def runExcelAiAgentWith(
         raise
     file_category = FileCategory.get_category_by_name(category_by_ai)
     logging.info(f"The file '{input_excel_file_name}' is '{file_category}' category.")
-    if file_category == FileCategory.INVALIDO: 
+    if file_category == FileCategory.INVALIDO:
         logging.info(AiAnalytics.__str__())
         AiAnalytics.export_str_ai_analytics_data_to_excel()
         return False

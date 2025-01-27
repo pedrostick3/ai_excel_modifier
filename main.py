@@ -39,8 +39,12 @@ def main():
         #"Test_Execution_data Template_quarter.xlsx",
         #"Test_Execution_data Template_50rows.xlsx",
         #"TE_unnamed.xlsx",
+        #"TE lower content.xlsx",
+        #"test_execution_data template lower.xlsx",
         ###### Test Files (Execution category):
         #"E_unnamed.xlsx",
+        #"E lower content.xlsx",
+        #"execution_data template lower.xlsx",
         ###### Test Files (Invalid category):
         #"E_unnamed_inv.xlsx",
         #"file-3.xlsx",
