@@ -75,16 +75,16 @@ class AzureAiService(AiService):
         """
         try:
             if continuous_user_conversation_prompt:
-                self.followup_conversation_messages.append({"role": "user", "content": continuous_user_conversation_prompt})
+                self.followup_conversation_messages.append(self.get_message_dict(role="user", content=continuous_user_conversation_prompt, tools=tools))
             else:
                 ai_role = "assistant" if use_assistant_instead_of_system else "system"
 
                 messages = []
                 if system_prompt:
-                    messages.append({"role": ai_role, "content": system_prompt})
+                    messages.append(self.get_message_dict(role=ai_role, content=system_prompt))
                 if example_prompts and len(example_prompts) % 2 == 0:
                     messages.extend(example_prompts)
-                messages.append({"role": "user", "content": first_user_prompt})
+                messages.append(self.get_message_dict(role="user", content=first_user_prompt, tools=tools))
 
                 self.followup_conversation_messages = messages
             
@@ -128,9 +128,11 @@ class AzureAiService(AiService):
             if log_response_message:
                 logging.info(f"response messages usage: {response.usage}")
                 logging.info(f"response message: {message}")
+                logging.info(f"response message model_dump_json: {message.model_dump_json()}")
                 logging.info(f"response message content: {messageContent}")
                 if tools and messageFunctionCalls:
                     logging.info(f"response message tool function calls: {messageFunctionCalls}")
+                    logging.info(f"response message tool function calls model_dump_json: {messageFunctionCalls.model_dump_json()}")
 
             self.followup_conversation_messages.append(message)
 

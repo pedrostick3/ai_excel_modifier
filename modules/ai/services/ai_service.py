@@ -80,3 +80,20 @@ class AiService(object):
             messages.pop(not_to_replace_first_messages)
         logging.info(f"Exists {len(messages)} messages in the conversation, with the following roles: {', '.join([message['role'] for message in messages])}.")
         return messages
+    
+    def get_message_dict(self, role: str, content: str, tools: list[dict] = None) -> dict:
+        """
+        Creates a message dictionary.
+
+        Args:
+            role (str): The role of the message.
+            content (str): The content of the message.
+            tools (list[dict]): The tools associated with the message.
+
+        Returns:
+            dict: The message dictionary.
+        """
+        message = {"role": role, "content": content}
+        if tools:
+            message["tools"] = tools
+        return message

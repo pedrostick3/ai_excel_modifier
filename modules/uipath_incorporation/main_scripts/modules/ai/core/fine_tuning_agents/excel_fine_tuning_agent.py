@@ -6,7 +6,9 @@ from modules.ai.services.openai_ai_service import OpenAiAiService
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.core.enums.file_category import FileCategory
 import modules.excel.constants.excel_constants as excel_constants
-import modules.ai.core.fine_tuning_agents.excel_fine_tuning_agent_prompts as prompts
+from modules.ai.core.fine_tuning_agents.prompts import excel_categorizer_and_header_finder_agent_prompts
+from modules.ai.core.fine_tuning_agents.prompts import excel_pre_header_modifier_agent_prompts
+from modules.ai.core.fine_tuning_agents.prompts import excel_content_modifier_with_function_calling_agent_prompts
 from modules.ai.core.function_calling.enums.functions_to_call import FunctionsToCall
 
 class ExcelFinetuningAgent:
@@ -137,7 +139,7 @@ class ExcelFinetuningAgent:
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         file_name = os.path.basename(excel_file_path)
         excel_categorizer_and_header_finder_agent_response = self.ask_ai(
-            system_prompt=prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+            system_prompt=excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
             user_prompt=f"""Categorize and find the header of the following file:
 Filename = '{file_name}'
 ```csv
@@ -186,7 +188,7 @@ Filename = '{file_name}'
         excel_data_first_rows_until_header = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path, only_get_first_rows=header_row_number)
         logging.info(f"AI ExcelGenericFinetuningAgent - {category} - excel_data_first_rows_until_header = {excel_data_first_rows_until_header}")
         excel_pre_header_modifier_agent_response = self.ask_ai(
-            system_prompt=prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
+            system_prompt=excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
             user_prompt=f"Modify the pre-header of the following file that belongs to the '{category.value}' category:\n{excel_data_first_rows_until_header}",
             ai_analytics_file_name=ai_analytics_file_name,
         )
@@ -241,6 +243,7 @@ Filename = '{file_name}'
         
         try:
             ai_response = self.ask_ai(
+                system_prompt=excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
                 user_prompt=f"""Return the function to call that modifies the content of the following file that belongs to the '{category.value}' category:
 input_excel_file_path = '{input_excel_file_path}'
 output_excel_file_path = '{output_excel_file_path}'

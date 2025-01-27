@@ -21,15 +21,15 @@ OR
 Install dependencies:
 
 ```bash
-pip install -r dependencies_to_install.txt
+pip install -r requirements.txt
 ```
 OR
 ```bash
-python3.9 -m pip install -r dependencies_to_install.txt
+python3.9 -m pip install -r requirements.txt
 ```
 OR
 ```bash
-.venv/Scripts/python.exe -m pip install -r dependencies_to_install.txt
+.venv/Scripts/python.exe -m pip install -r requirements.txt
 ```
 
 Run the application on F5 (run button) or:

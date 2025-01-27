@@ -4,7 +4,6 @@ import json
 import shutil
 import time
 from modules.ai.fine_tuning_agents.utils.training_file_generator.fine_tuning_training_file_generator import FinetuningTrainingFileGenerator
-from modules.ai.services.ai_service import AiService
 from modules.ai.services.openai_ai_service import OpenAiAiService
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.enums.file_category import FileCategory
@@ -12,7 +11,12 @@ from modules.ai.enums.ai_fine_tuning_job_status import AiFineTuningJobStatus
 from modules.ai.enums.ai_file_status import AiFileStatus
 import modules.excel.constants.excel_constants as excel_constants
 import constants.configs as configs
-import modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent_prompts as prompts
+from modules.ai.fine_tuning_agents.excel_generic_agent.prompts import excel_categorizer_agent_prompts
+from modules.ai.fine_tuning_agents.excel_generic_agent.prompts import excel_header_finder_agent_prompts
+from modules.ai.fine_tuning_agents.excel_generic_agent.prompts import excel_categorizer_and_header_finder_agent_prompts
+from modules.ai.fine_tuning_agents.excel_generic_agent.prompts import excel_pre_header_modifier_agent_prompts
+from modules.ai.fine_tuning_agents.excel_generic_agent.prompts import excel_content_modifier_with_code_agent_prompts
+from modules.ai.fine_tuning_agents.excel_generic_agent.prompts import excel_content_modifier_with_function_calling_agent_prompts
 from modules.ai.function_calls_agent.enums.functions_to_call import FunctionsToCall
 
 
@@ -146,7 +150,7 @@ class ExcelGenericFinetuningAgent:
             training_file=uploaded_file.id, # The maximum file upload size is 1 GB. Training file must have at least 10 examples.
             model=self.base_model,
             hyperparameters={
-                "n_epochs": 10, # The default number of epochs is 5. Epochs are the number of iterations the model will go through the training_file to learn the data.
+                "n_epochs": 5, # The default number of epochs is 5. Epochs are the number of iterations the model will go through the training_file to learn the data.
             },
         )
         training_start_time = time.time()
@@ -289,7 +293,7 @@ class ExcelGenericFinetuningAgent:
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         file_name = os.path.basename(excel_file_path)
         excel_categorizer_and_header_finder_agent_response = self.ask_ai(
-            system_prompt=prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+            system_prompt=excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
             user_prompt=f"""Categorize and find the header of the following file:
 Filename = '{file_name}'
 ```csv
@@ -334,7 +338,7 @@ Filename = '{file_name}'
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         file_name = os.path.basename(excel_file_path)
         excel_categorizer_agent_response = self.ask_ai(
-            system_prompt=prompts.CATEGORIZER_SYSTEM_PROMPT,
+            system_prompt=excel_categorizer_agent_prompts.CATEGORIZER_SYSTEM_PROMPT,
             user_prompt=f"""Categorize the following file:
 Filename = '{file_name}'
 ```csv
@@ -365,7 +369,7 @@ Filename = '{file_name}'
         file_name = os.path.basename(excel_file_path)
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         excel_header_finder_agent_response = self.ask_ai(
-            system_prompt=prompts.HEADER_FINDER_SYSTEM_PROMPT,
+            system_prompt=excel_header_finder_agent_prompts.HEADER_FINDER_SYSTEM_PROMPT,
             user_prompt=f"Find the header of the following file:\n{excel_data_first_5_rows}",
             ai_analytics_file_name=ai_analytics_file_name if ai_analytics_file_name else file_name,
         )
@@ -402,7 +406,7 @@ Filename = '{file_name}'
         excel_data_first_rows_until_header = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path, only_get_first_rows=header_row_number)
         logging.info(f"AI ExcelGenericFinetuningAgent - {category} - excel_data_first_rows_until_header = {excel_data_first_rows_until_header}")
         excel_pre_header_modifier_agent_response = self.ask_ai(
-            system_prompt=prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
+            system_prompt=excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
             user_prompt=f"Modify the pre-header of the following file that belongs to the '{category.value}' category:\n{excel_data_first_rows_until_header}",
             ai_analytics_file_name=ai_analytics_file_name,
         )
@@ -457,7 +461,7 @@ Filename = '{file_name}'
         
         try:
             python_code = self.ask_ai(
-                system_prompt=prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
+                system_prompt=excel_content_modifier_with_code_agent_prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
                 user_prompt=f"""Return the python code to modify the content of the following file that belongs to the '{category.value}' category:
 input_excel_file_path = '{input_excel_file_path}'
 output_excel_file_path = '{output_excel_file_path}'
@@ -507,7 +511,7 @@ excel_header_row_index = {excel_header_row_index}""",
         
         try:
             ai_response = self.ask_ai(
-                system_prompt=prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
+                system_prompt=excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
                 user_prompt=f"""Return the function to call that modifies the content of the following file that belongs to the '{category.value}' category:
 input_excel_file_path = '{input_excel_file_path}'
 output_excel_file_path = '{output_excel_file_path}'
