@@ -55,6 +55,45 @@ models=openai.models.list()
 print(f"Available Models: {models}")
 ```
 
+Create a fine-tuning model via API:
+```python
+from modules.ai.services.openai_ai_service import OpenAiAiService
+from modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent import ExcelGenericFinetuningAgent
+
+ExcelGenericFinetuningAgent(
+    ai_service=OpenAiAiService(),
+    base_model=FINETUNING_BASE_MODEL,
+    create_fine_tuning_model=True,
+    force_rewrite_training_file=True,
+)
+```
+
+Delete a fine-tuning model via API:
+```python
+from modules.ai.services.openai_ai_service import OpenAiAiService
+from modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent import ExcelGenericFinetuningAgent
+
+ExcelGenericFinetuningAgent(
+    ai_service=OpenAiAiService(),
+    base_model=FINETUNING_BASE_MODEL,
+    fine_tuning_model=FINETUNING_MODEL,
+    delete_fine_tuning_model=True,
+    delete_fine_tuning_model_safety_trigger=True,
+)
+```
+
+Use a fine-tuning model via API:
+```python
+from modules.ai.services.openai_ai_service import OpenAiAiService
+from modules.ai.fine_tuning_agents.excel_generic_agent.excel_generic_fine_tuning_agent import ExcelGenericFinetuningAgent
+
+fine_tuning_agent = ExcelGenericFinetuningAgent(
+    ai_service=OpenAiAiService(),
+    base_model=FINETUNING_BASE_MODEL,
+    fine_tuning_model=FINETUNING_MODEL,
+)
+```
+
 ### Tested Models:
 - **o1-preview**
 - **o1-mini**
@@ -70,7 +109,13 @@ print(f"Available Models: {models}")
 - **CodeInterpreterAgent (not tested yet)**: modules/ai/code_interpreter_agent/code_interpreter_agent/code_interpreter_agent.py
 - **FileSearchAgent (not tested yet)**: modules/ai/file_search_agent/file_search_agent/file_search_agent.py
 - **ExcelSumColumnsAgent**: modules/ai/function_calls_agent/excel_sum_columns_agent/excel_sum_columns_agent.py
-- **ExcelGenericFineTuningAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/excel_generic_fine_tuning_agent_prompts.py
+- **ExcelGenericFineTuningAgent**:
+    - **ExcelCategorizerAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/prompts/excel_categorizer_agent_prompts.py
+    - **ExcelHeaderFinderAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/prompts/excel_header_finder_agent_prompts.py
+    - **ExcelCategorizerAndHeaderFinderAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/prompts/excel_categorizer_and_header_finder_agent_prompts.py
+    - **ExcelPreHeaderModifierAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/prompts/excel_pre_header_modifier_agent_prompts.py
+    - **ExcelContentModifierWithFunctionCallingAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/prompts/excel_content_modifier_with_function_calling_agent_prompts.py
+    - **ExcelContentModifierWithCodeAgent**: modules/ai/fine_tuning_agents/excel_generic_agent/prompts/excel_content_modifier_with_code_agent_prompts.py
 
 ### AI Services & Utils:
 - **AzureAiService**: modules/ai/services/azure_ai_service.py

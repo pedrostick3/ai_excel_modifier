@@ -24,6 +24,13 @@ except Exception as e:
     print(f'Error reading file: {e}')
     exit()
 
+# Remove empty columns & rows after the header
+header = df.iloc[:excel_header_row_index+1]
+data = df.iloc[excel_header_row_index+1:]
+data_cleaned = data.dropna(axis=0, how='all') # axis=0 = rows
+df = pd.concat([header, data_cleaned], axis=0)
+df = df.dropna(axis=1, how='all') # axis=1 = columns
+
 # Step 1: Reorder the columns
 try:
     expected_columns_order = ['ExecutionId', 'ExecutionStartDate', 'ExecutionEndDate', 'TaskWorkload', 'CaseStartDate', 'CaseEndDate', 'IsSuccessful', 'RunTimeSeconds', 'AverageRunTimeSeconds']

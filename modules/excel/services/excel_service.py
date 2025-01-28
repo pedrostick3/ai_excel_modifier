@@ -73,13 +73,15 @@ class ExcelService:
                 dataFrame = pd.read_excel(excel_file_path, header=None)
 
             # Busca a linha que contém o conteúdo especificado
-            matching_rows = dataFrame[dataFrame.apply(lambda row: ','.join(row.astype(str)).strip() == excel_row_content.strip(), axis=1)]
+            expected_columns = [col.strip() for col in excel_row_content.split(',')]
+            matching_rows = dataFrame[dataFrame.apply(lambda row: list(row.fillna('').astype(str).str.strip()) == expected_columns, axis=1)]
+            matching_rows_without_empty_columns = dataFrame[dataFrame.apply(lambda row: [cell for cell in row.fillna('').astype(str).str.strip() if cell] == expected_columns, axis=1)]
 
-            if matching_rows.empty:
-                logging.error(f"Content '{excel_row_content}' not found in the file.")
+            if matching_rows.empty and matching_rows_without_empty_columns.empty:
+                logging.error(f"excel_row_content='{excel_row_content}' expected_columns={expected_columns} not found in the file.")
                 raise ValueError(f"Content '{excel_row_content}' not found in the file.")
 
-            row_number = matching_rows.index[0]
+            row_number = matching_rows.index[0] if not matching_rows.empty else matching_rows_without_empty_columns.index[0]
             return row_number + 1
         except Exception as e:
             logging.error(f"Error finding the row number: {e}")

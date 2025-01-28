@@ -19,6 +19,9 @@ class ModifyExcelContentFunctions:
         # Load the Excel file
         df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
 
+        # Remove empty rows & columns after excel_header_row_index
+        df = ModifyExcelContentFunctions._remove_empty_rows_and_columns(df, excel_header_row_index)
+
         # Step 1: Move 'IsSuccessful' column to column A
         is_successful_column_name = ModifyExcelContentFunctions._check_column_name_and_make_case_insensitive_if_needed(df, 'IsSuccessful')
         if is_successful_column_name:
@@ -72,6 +75,9 @@ class ModifyExcelContentFunctions:
         except Exception as e:
             print(f'Error reading file: {e}')
             exit()
+
+        # Remove empty rows & columns after excel_header_row_index
+        df = ModifyExcelContentFunctions._remove_empty_rows_and_columns(df, excel_header_row_index)
 
         # Step 1: Reorder the columns
         try:
@@ -177,5 +183,28 @@ class ModifyExcelContentFunctions:
             return column_name
 
         # Normalize column names to lowercase
-        lower_columns = {str(col.lower()): col for col in columns}
+        lower_columns = {str(col).lower(): col for col in columns}
         return lower_columns.get(column_name.lower(), None)
+    
+    @staticmethod
+    def _remove_empty_rows_and_columns(df: pd.DataFrame, excel_header_row_index: int = None) -> pd.DataFrame:
+        """
+        Remove empty rows and columns after the Excel header row index.
+
+        Args:
+            df (pd.DataFrame): The DataFrame.
+            excel_header_row_index (int): The Excel header row index.
+
+        Returns:
+            pd.DataFrame: The cleaned DataFrame.
+        """
+        if excel_header_row_index is None or excel_header_row_index <= 0 or excel_header_row_index >= len(df):
+            return df.dropna(axis=0, how='all').dropna(axis=1, how='all')
+
+        header = df.iloc[:excel_header_row_index+1]
+        data = df.iloc[excel_header_row_index+1:]
+        data_cleaned = data.dropna(axis=0, how='all') # axis=0 = rows
+        df = pd.concat([header, data_cleaned], axis=0)
+        df = df.dropna(axis=1, how='all') # axis=1 = columns
+        return df
+        

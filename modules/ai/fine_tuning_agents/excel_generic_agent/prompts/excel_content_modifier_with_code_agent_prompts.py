@@ -17,6 +17,7 @@ Additional rules:
 Return the python code to modify the complete file and save it.
 Your response must not include code-blocks or MARKDOWN.
 Initialize the given variables in the beginning of the code.
+Remove empty columns and rows after the excel header row.
 Apply case-insensitive column name checking if needed.
 Use concat() function to join dataframes.
 Don't use xlswriter to save the file."""

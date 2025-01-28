@@ -19,6 +19,13 @@ def _check_column_name_and_make_case_insensitive_if_needed(df: pd.DataFrame, col
 # Load the Excel file
 df = pd.read_excel(input_excel_file_path, header=excel_header_row_index)
 
+# Remove empty columns & rows after the header
+header = df.iloc[:excel_header_row_index+1]
+data = df.iloc[excel_header_row_index+1:]
+data_cleaned = data.dropna(axis=0, how='all') # axis=0 = rows
+df = pd.concat([header, data_cleaned], axis=0)
+df = df.dropna(axis=1, how='all') # axis=1 = columns
+
 # Step 1: Move 'IsSuccessful' column to column A
 is_successful_column_name = _check_column_name_and_make_case_insensitive_if_needed(df, 'IsSuccessful')
 if is_successful_column_name:

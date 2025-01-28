@@ -259,6 +259,35 @@ ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseE
     },
 ]
 
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME_WITH_EMPTY_COLS = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'new file.xlsx'
+```csv
+,,,,,,,,,
+ExecutionId,ExecutionStartDate,ExecutionEndDate,,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146
+153,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f"""{{
+    "category": "{FileCategory.EXECUCAO.value}",
+    "header": {{
+        "row_number": "2",
+        "row_content": "ExecutionId,ExecutionStartDate,ExecutionEndDate,,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds"
+    }}
+}}""",
+    },
+]
+
 CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_EXECUCAO_WITHOUT_FILENAME_CASE_INSENSITIVE = [
     {
         "role": "system",
@@ -312,6 +341,35 @@ ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,Task
     "header": {{
         "row_number": "4",
         "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"
+    }}
+}}""",
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_TESTE_EXECUCAO_WITHOUT_FILENAME_WITH_EMPTY_COLS = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'copy of edited file.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,,,,
+Total run time,3910,,,,,,,,
+,,,,,,,,,
+ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f"""{{
+    "category": "{FileCategory.TESTE_EXECUCAO.value}",
+    "header": {{
+        "row_number": "4",
+        "row_content": "ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds"
     }}
 }}""",
     },

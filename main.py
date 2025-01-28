@@ -24,7 +24,7 @@ CUSTOM_AI_SERVICE_BASE_URL = configs.GITHUB_BASE_URL
 CUSTOM_AI_SERVICE_KEY = configs.GITHUB_KEY
 CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
 FINETUNING_BASE_MODEL = configs.OPENAI_FINE_TUNING_BASE_MODEL
-FINETUNING_MODEL = configs.OPENAI_FINE_TUNING_MODEL
+FINETUNING_MODEL = configs.OPENAI_FINE_TUNING_MODEL_28_01_2025
 AI_TYPE = AiType.FINE_TUNING
 
 def main():
@@ -42,11 +42,13 @@ def main():
         #"TE lower content.xlsx",
         #"test_execution_data template lower.xlsx",
         #"Test_Execution_data Template some_empty_cells.xlsx",
+        #"Test_Execution_data Template empty columns and rows.xlsx",
         ###### Test Files (Execution category):
         #"E_unnamed.xlsx",
         #"E lower content.xlsx",
         #"execution_data template lower.xlsx",
         #"Execution_data Template some_empty_cells.xlsx",
+        #"Execution_data Template empty columns and rows.xlsx",
         ###### Test Files (Invalid category):
         #"E_unnamed_inv.xlsx",
         #"file-3.xlsx",
