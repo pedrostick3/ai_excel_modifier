@@ -3,7 +3,7 @@ import os
 import json
 import shutil
 import time
-from modules.ai.fine_tuning_agents.utils.training_file_generator.fine_tuning_training_file_generator import FinetuningTrainingFileGenerator
+from modules.ai.fine_tuning_agents.utils.fine_tuning_file_generator.fine_tuning_file_generator import FinetuningFileGenerator
 from modules.ai.services.openai_ai_service import OpenAiAiService
 from modules.excel.services.excel_service import ExcelService
 from modules.ai.enums.file_category import FileCategory
@@ -36,6 +36,7 @@ class ExcelGenericFinetuningAgent:
         create_fine_tuning_model: bool = False,
         only_create_fine_tuning_model_if_not_exists: bool = True,
         force_rewrite_training_file: bool = False,
+        force_rewrite_validation_file: bool = False,
     ):
         """
         Initialize the AI Agent.
@@ -53,6 +54,7 @@ class ExcelGenericFinetuningAgent:
             self.create_fine_tuning_model(
                 only_create_fine_tuning_model_if_not_exists=only_create_fine_tuning_model_if_not_exists,
                 force_rewrite_training_file=force_rewrite_training_file,
+                force_rewrite_validation_file=force_rewrite_validation_file,
             )
     
     def delete_fine_tuning_model(
@@ -60,6 +62,9 @@ class ExcelGenericFinetuningAgent:
         fine_tuning_model_to_delete: str,
         exit_to_delete_the_training_file_of_fine_tuning_model_in_the_web_interface: bool = True,
         delete_all_step_models: bool = True,
+        delete_training_file: bool = True,
+        delete_validation_file: bool = True,
+        delete_step_metrics_file: bool = True,
     ) -> bool:
         """
         Delete the fine-tuning model.
@@ -91,6 +96,25 @@ class ExcelGenericFinetuningAgent:
             deleted_model = self.ai_service.get_ai_client().models.delete(fine_tuning_model_to_delete)
             if deleted_model.deleted:
                 logging.info(f"ExcelGenericFinetuningAgent - delete_fine_tuning_model(): Fine-tuning model deleted. (fine_tuning_model_to_delete = {fine_tuning_model_to_delete})")
+                
+                if delete_training_file or delete_validation_file or delete_step_metrics_file:
+                    jobs = self.ai_service.get_ai_client().fine_tuning.jobs.list()
+                    logging.info(f"ExcelGenericFinetuningAgent - delete_fine_tuning_model(): Found {len(jobs.data)} fine-tuning jobs: {jobs.data}")
+                    model_job_exists = any(fine_tuning_model_to_delete == job.fine_tuned_model for job in jobs.data)
+                    if model_job_exists:
+                        model_job = next(job for job in jobs.data if fine_tuning_model_to_delete == job.fine_tuned_model)
+                        logging.info(f"ExcelGenericFinetuningAgent - delete_fine_tuning_model(): Fine-tuning model job: {model_job.model_dump_json(indent=2)}")
+                        if delete_training_file:
+                            self.ai_service.delete_file(file_id=model_job.training_file, note="training_file")
+                        if delete_validation_file:
+                            self.ai_service.delete_file(file_id=model_job.validation_file, note="validation_file")
+                        if delete_step_metrics_file:
+                            uploaded_files = self.ai_service.get_ai_client().files.list()
+                            step_metrics_files = [uploaded_file for uploaded_file in uploaded_files.data if uploaded_file.purpose == "fine-tune-results"]
+                            logging.info(f"ExcelGenericFinetuningAgent - delete_fine_tuning_model(): Found {len(step_metrics_files)} step_metrics files: {step_metrics_files}")
+                            for step_metrics_file in step_metrics_files:
+                                self.ai_service.delete_file(file_id=step_metrics_file.id, note="step_metrics_file")
+
                 if exit_to_delete_the_training_file_of_fine_tuning_model_in_the_web_interface:
                     logging.info("ExcelGenericFinetuningAgent - delete_fine_tuning_model(): You should manually delete the training file of the fine-tuning model in the respective AI Provider Web Interface.\nExiting...")
                     exit()
@@ -103,6 +127,8 @@ class ExcelGenericFinetuningAgent:
         self,
         generate_training_file: bool = True,
         force_rewrite_training_file: bool = False,
+        generate_validation_file: bool = True,
+        force_rewrite_validation_file: bool = False,
         only_create_fine_tuning_model_if_not_exists: bool = True,
         exit_to_deploy_fine_tuning_model_in_azure_ai_foundry_web_interface: bool = True,
     ) -> None:
@@ -125,29 +151,23 @@ class ExcelGenericFinetuningAgent:
                 return self.fine_tuning_model
 
         if generate_training_file:
-            FinetuningTrainingFileGenerator.generate_training_file(force_rewrite=force_rewrite_training_file)
+            FinetuningFileGenerator.generate_training_file(force_rewrite=force_rewrite_training_file)
+        if generate_validation_file:
+            FinetuningFileGenerator.generate_validation_file(force_rewrite=force_rewrite_validation_file)
         
-        uploaded_files = self.ai_service.get_ai_client().files.list().data
-        training_file_already_uploaded = any(file.filename == os.path.basename(FinetuningTrainingFileGenerator.training_file) for file in uploaded_files)
-        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Training file already uploaded: {training_file_already_uploaded}")
+        uploaded_training_file_id = self.ai_service.upload_file(FinetuningFileGenerator.TRAINING_FILE_PATH)
+        uploaded_validation_file_id = self.ai_service.upload_file(FinetuningFileGenerator.VALIDATION_FILE_PATH)
 
-        if training_file_already_uploaded:
-            uploaded_file = next(file for file in uploaded_files if file.filename == os.path.basename(FinetuningTrainingFileGenerator.training_file))
-        else:
-            uploaded_file = self.ai_service.get_ai_client().files.create(
-                file=open(FinetuningTrainingFileGenerator.training_file, "rb"), # Individual files can be up to 512 MB in size.
-                purpose="fine-tune", # Can't be "fine-tuning"
-            )
-            uploaded_file = self.ai_service.get_ai_client().files.retrieve(uploaded_file.id)
-            if not AiFileStatus.has_finished(uploaded_file.status):
-                logging.info(f"Uploaded file {uploaded_file.id} not finished. Status: {uploaded_file.status}. Waiting...")
-                while not AiFileStatus.has_finished(uploaded_file.status): # É quase instantâneo
-                    time.sleep(1) # 1 second
-                    uploaded_file = self.ai_service.get_ai_client().files.retrieve(uploaded_file.id)
-        logging.info(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): Uploaded file: {uploaded_file.model_dump_json(indent=2)}")
+        if not uploaded_training_file_id:
+            logging.error(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): No valid uploaded training file found '{os.path.basename(FinetuningFileGenerator.TRAINING_FILE_PATH)}' ({uploaded_training_file_id}).")
+            return None
+        if not uploaded_validation_file_id:
+            logging.error(f"ExcelGenericFinetuningAgent - create_fine_tuning_model(): No valid uploaded validation file found '{os.path.basename(FinetuningFileGenerator.VALIDATION_FILE_PATH)}' ({uploaded_validation_file_id}).")
+            return None
 
         training_job = self.ai_service.get_ai_client().fine_tuning.jobs.create(
-            training_file=uploaded_file.id, # The maximum file upload size is 1 GB. Training file must have at least 10 examples.
+            training_file=uploaded_training_file_id, # The maximum file upload size is 512 MB. Training file must have at least 10 examples.
+            validation_file=uploaded_validation_file_id, # The maximum file upload size is 512 MB. 
             model=self.base_model,
             hyperparameters={
                 "n_epochs": 5, # The default number of epochs is 5. Epochs are the number of iterations the model will go through the training_file to learn the data.

@@ -6,6 +6,12 @@ When someone asks to return the function to call that modifies the content of a 
 - '{FileCategory.EXECUCAO.value}', return the 'modify_excel_content_for_execution_category' function.
 - '{FileCategory.TESTE_EXECUCAO.value}', return the 'modify_excel_content_for_test_execution_category' function."""
 
+# Functions must be separated from messegaes in the training file. [Official Function Calling Documentation](https://platform.openai.com/docs/guides/fine-tuning#fine-tuning-examples)
+FUNCTIONS = [
+    FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_EXECUTION_CATEGORY.value["tools"][0]["function"],
+    FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_TEST_EXECUTION_CATEGORY.value["tools"][0]["function"],
+]
+
 CONTENT_MODIFIER_PROMPTS_CATEGORY_EXECUCAO = [
     {
         "role": "system",
@@ -17,22 +23,13 @@ CONTENT_MODIFIER_PROMPTS_CATEGORY_EXECUCAO = [
 input_excel_file_path = './assets/docs_input/Execution_data Template.xlsx'
 output_excel_file_path = './assets/docs_output/Execução - 16_12_2024 - Execution_data Template.xlsx'
 excel_header_row_index = 1""",
-        "tools": [
-            *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_EXECUTION_CATEGORY.value["tools"],
-            *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_TEST_EXECUTION_CATEGORY.value["tools"],
-        ],
     },
     {
         "role": "assistant",
-        "tool_calls": [
-            {
-                "function": {
-                    "arguments": "{\"input_excel_file_path\":\"./assets/docs_input/Execution_data Template.xlsx\",\"output_excel_file_path\":\"./assets/docs_output/Execução - 16_12_2024 - Execution_data Template.xlsx\",\"excel_header_row_index\":1}",
-                    "name": "modify_excel_content_for_execution_category",
-                },
-                "type": "function",
-            },
-        ],
+        "function_call": {
+            "name": "modify_excel_content_for_execution_category",
+            "arguments": "{\"input_excel_file_path\":\"./assets/docs_input/Execution_data Template.xlsx\",\"output_excel_file_path\":\"./assets/docs_output/Execução - 16_12_2024 - Execution_data Template.xlsx\",\"excel_header_row_index\":1}",
+        },
     },
 ]
 
@@ -47,21 +44,12 @@ CONTENT_MODIFIER_PROMPTS_CATEGORY_TESTE_EXECUCAO = [
 input_excel_file_path = './assets/docs_input/Test_Execution_data Template.xlsx'
 output_excel_file_path = './assets/docs_output/Teste Execução - 13_12_2024 - Test_Execution_data Template.xlsx'
 excel_header_row_index = 3""",
-        "tools": [
-            *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_EXECUTION_CATEGORY.value["tools"],
-            *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_TEST_EXECUTION_CATEGORY.value["tools"],
-        ],
     },
     {
         "role": "assistant",
-        "tool_calls": [
-            {
-                "function": {
-                    "arguments": "{\"input_excel_file_path\":\"./assets/docs_input/Test_Execution_data Template.xlsx\",\"output_excel_file_path\":\"./assets/docs_output/Teste Execução - 13_12_2024 - Test_Execution_data Template.xlsx\",\"excel_header_row_index\":3}",
-                    "name": "modify_excel_content_for_test_execution_category",
-                },
-                "type": "function",
-            },
-        ],
+        "function_call": {
+            "name": "modify_excel_content_for_test_execution_category",
+            "arguments": "{\"input_excel_file_path\":\"./assets/docs_input/Test_Execution_data Template.xlsx\",\"output_excel_file_path\":\"./assets/docs_output/Teste Execução - 13_12_2024 - Test_Execution_data Template.xlsx\",\"excel_header_row_index\":3}",
+        },
     },
 ]

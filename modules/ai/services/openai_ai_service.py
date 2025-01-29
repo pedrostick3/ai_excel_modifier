@@ -1,9 +1,11 @@
 import constants.configs as configs
 from modules.ai.services.ai_service import AiService
+from modules.ai.enums.ai_file_status import AiFileStatus
 from modules.analytics.services.ai_analytics import AiAnalytics
 import openai
 import logging
 import time
+import os
 
 
 class OpenAiAiService(AiService):
@@ -137,3 +139,62 @@ class OpenAiAiService(AiService):
         except Exception as e:
             logging.error(f"Erro ao comunicar com a AI: {e}")
             raise
+
+    def upload_file(self,
+        file_path: str,
+        purpose: str = "fine-tune",
+    ) -> str:
+        """
+        Upload a file to the OpenAI API.
+
+        Args:
+            file_path (str): The path to the file to be uploaded.
+            purpose (str): The purpose of the file to be uploaded
+
+        Returns:
+            str: The file ID.
+        """
+        uploaded_files = self.get_ai_client().files.list().data
+        is_file_already_uploaded = any(file.filename == os.path.basename(file_path) for file in uploaded_files)
+        logging.info(f"OpenAiAiService - upload_file(): Is file ({os.path.basename(file_path)}) already uploaded? {is_file_already_uploaded}")
+
+        if is_file_already_uploaded:
+            uploaded_file = next(file for file in uploaded_files if file.filename == os.path.basename(file_path))
+        else:
+            uploaded_file = self.get_ai_client().files.create(
+                file=open(file_path, "rb"), # Individual files can be up to 512 MB in size.
+                purpose=purpose, # Can't be "fine-tuning" so it's recommended to use "fine-tune"
+            )
+            uploaded_file = self.get_ai_client().files.retrieve(uploaded_file.id)
+            if not AiFileStatus.has_finished(uploaded_file.status):
+                logging.info(f"OpenAiAiService - upload_file(): Uploaded file {uploaded_file.filename} ({uploaded_file.id}) not finished. Status: {uploaded_file.status}. Waiting...")
+                while not AiFileStatus.has_finished(uploaded_file.status): # It's almost instantaneous
+                    time.sleep(1) # 1 second
+                    uploaded_file = self.get_ai_client().files.retrieve(uploaded_file.id)
+
+        logging.info(f"OpenAiAiService - upload_file(): Uploaded file: {uploaded_file.model_dump_json(indent=2)}")
+        return uploaded_file.id
+    
+    def delete_file(self, file_id: str, note: str = None) -> bool:
+        """
+        Delete a file from the OpenAI API.
+
+        Args:
+            file_id (str): The ID of the file to be deleted.
+            note (str): The note to be used when deleting the file.
+
+        Returns:
+            bool: Flag to indicate if the file was deleted.
+        """
+        uploaded_files = self.get_ai_client().files.list()
+        exists_uploaded_file = any(file.id == file_id for file in uploaded_files.data)
+        if not exists_uploaded_file:
+            logging.error(f"OpenAiAiService - delete_file(): File not found. (file_id = {file_id} | note = {note})")
+            return False
+
+        deleted_file = self.get_ai_client().files.delete(file_id)
+        if not deleted_file.deleted:
+            logging.error(f"OpenAiAiService - delete_file(): File not deleted. (file_id = {file_id} | note = {note})")
+        
+        logging.info(f"OpenAiAiService - delete_file(): File deleted. (file_id = {file_id} | note = {note})")
+        return True

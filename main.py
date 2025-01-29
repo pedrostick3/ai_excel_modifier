@@ -24,7 +24,7 @@ CUSTOM_AI_SERVICE_BASE_URL = configs.GITHUB_BASE_URL
 CUSTOM_AI_SERVICE_KEY = configs.GITHUB_KEY
 CUSTOM_AI_SERVICE_MODEL = configs.GITHUB_MODEL
 FINETUNING_BASE_MODEL = configs.OPENAI_FINE_TUNING_BASE_MODEL
-FINETUNING_MODEL = configs.OPENAI_FINE_TUNING_MODEL_28_01_2025
+FINETUNING_MODEL = configs.OPENAI_FINE_TUNING_MODEL_29_01_2025_WITH_VALIDATION_FILE
 AI_TYPE = AiType.FINE_TUNING
 
 def main():
@@ -81,6 +81,7 @@ def main():
             #delete_fine_tuning_model_safety_trigger=True,
             #create_fine_tuning_model=True,
             #force_rewrite_training_file=True,
+            #force_rewrite_validation_file=True,
         )
 
     if AI_TYPE == AiType.ASSISTANT_FILE_SEARCH or AI_TYPE == AiType.ASSISTANT_CODE_INTERPRETER:
