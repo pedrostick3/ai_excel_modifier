@@ -1,7 +1,7 @@
 from enum import Enum
 import logging
 import json
-from modules.ai_manual_implementation.core.function_calling.functions.modify_excel_content_functions import ModifyExcelContentFunctions
+from modules.ai_manual_implementation.function_calls_agent.functions.modify_excel_content_functions import ModifyExcelContentFunctions
 
 class FunctionsToCall(Enum):
     """

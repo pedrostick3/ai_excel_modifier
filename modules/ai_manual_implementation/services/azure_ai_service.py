@@ -1,23 +1,27 @@
+from modules.ai_manual_implementation.services.ai_service import AiService
+import constants.configs as configs
 from modules.analytics.services.ai_analytics import AiAnalytics
-from modules.ai_manual_implementation.utils.token_utils import TokenUtils
-import json
-import openai
+from openai import AzureOpenAI
 import logging
 import time
 
-class OpenAiAiService:
+
+class AzureAiService(AiService):
     """
-    Service class to interact with OpenAI AI for generating responses based on prompts.
+    Service class to interact with Azure AI for generating responses based on prompts.
     """
 
-    def __init__(self, api_key: str):
+    def __init__(self):
         """
-        Initialize the OpenAI API.
+        Initialize the Azure AI API.
         """
-        openai.api_key = api_key
-        self.client = openai
+        self.client = AzureOpenAI(
+            azure_endpoint=configs.AZURE_ENDPOINT,
+            api_key=configs.AZURE_API_KEY_1,
+            api_version=configs.AZURE_API_VERSION,
+        )
 
-    def get_ai_client(self) -> openai:
+    def get_ai_client(self) -> AzureOpenAI:
         """
         Get the client to be used for the AI/ML API.
 
@@ -30,11 +34,11 @@ class OpenAiAiService:
         self,
         model: str,
         first_user_prompt: str,
-        system_prompt: str = None,
-        example_prompts: list[dict[str, str]] = None,
+        system_prompt: str | None = None,
+        example_prompts: list[dict[str, str]] | None = None,
         continuous_user_conversation_prompt: str = None,
         use_assistant_instead_of_system: bool = False,
-        response_format: dict = {"type": "json_object"},
+        response_format: None | dict = {"type": "json_object"},
         temperature: float = 1,
         top_p: float = 1,
         tools: list[dict] = None,
@@ -51,11 +55,11 @@ class OpenAiAiService:
         Args:
             model (str): The model to be used.
             first_user_prompt (str): The first user prompt to be used.
-            system_prompt (str): The system prompt to be used.
-            example_prompts (list[dict[str, str]]): The example prompts to be used.
+            system_prompt (str | None): The system prompt to be used.
+            example_prompts (list[dict[str, str]] | None): The example prompts to be used.
             continuous_user_conversation_prompt (str): The continuous user conversation message to be used.
             use_assistant_instead_of_system (bool): Flag to indicate if the assistant should be used instead of the system. "o1-preview" and "o1-mini" models require this parameter to be True.
-            response_format (dict): The response format to be used.
+            response_format (None | dict): The response format to be used.
             temperature (float): The temperature to be used that determines the randomness of the response [deterministic = 0 < temp < 2 = creative].
             top_p (float): The nucleus sampling parameter to be used. It is the probability mass below which, the model will not consider the next token [0 < top_p <= 1].
             tools (list[dict]): The tools to be used.
@@ -71,21 +75,21 @@ class OpenAiAiService:
         """
         try:
             if continuous_user_conversation_prompt:
-                self.followup_conversation_messages.append(self._get_message_dict(role="user", content=continuous_user_conversation_prompt, tools=tools))
+                self.followup_conversation_messages.append(self.get_message_dict(role="user", content=continuous_user_conversation_prompt, tools=tools))
             else:
                 ai_role = "assistant" if use_assistant_instead_of_system else "system"
 
                 messages = []
                 if system_prompt:
-                    messages.append(self._get_message_dict(role=ai_role, content=system_prompt))
+                    messages.append(self.get_message_dict(role=ai_role, content=system_prompt))
                 if example_prompts and len(example_prompts) % 2 == 0:
                     messages.extend(example_prompts)
-                messages.append(self._get_message_dict(role="user", content=first_user_prompt, tools=tools))
+                messages.append(self.get_message_dict(role="user", content=first_user_prompt, tools=tools))
 
                 self.followup_conversation_messages = messages
             
             
-            self.followup_conversation_messages = self._handle_conversation_messages_length(
+            self.followup_conversation_messages = self.handle_conversation_messages_length(
                 base_model if base_model else model,
                 self.followup_conversation_messages,
                 not_to_replace_first_messages=1 + len(example_prompts) if example_prompts and len(example_prompts) % 2 == 0 else 1, # system_prompt + example_prompts
@@ -102,7 +106,7 @@ class OpenAiAiService:
                 response_format=response_format,
                 temperature=temperature,
                 top_p=top_p,
-                tools=tools,
+                tools=tools, # [https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/function-calling#single-toolfunction-calling-example]
                 tool_choice=tool_choice,
             )
             execution_time = time.time() - start_time
@@ -136,36 +140,3 @@ class OpenAiAiService:
         except Exception as e:
             logging.error(f"Erro ao comunicar com a AI: {e}")
             raise
-
-    def _handle_conversation_messages_length(self, model: str, messages: list[dict], not_to_replace_first_messages: int = 0) -> list[dict]:
-        """
-        Handles the conversation messages length to ensure it is within the maximum token limit for the specified model.
-
-        Args:
-            model (str): The model name to validate against.
-            messages (list[dict]): The conversation messages to be validated.
-
-        Returns:
-            list[dict]: The conversation messages with the correct length.
-        """
-        while not TokenUtils.is_context_window_valid(model, json.dumps(messages), log_id="messages") and len(messages) > 1:
-            messages.pop(not_to_replace_first_messages)
-        logging.info(f"Exists {len(messages)} messages in the conversation, with the following roles: {', '.join([message['role'] for message in messages])}.")
-        return messages
-    
-    def _get_message_dict(self, role: str, content: str, tools: list[dict] = None) -> dict:
-        """
-        Creates a message dictionary.
-
-        Args:
-            role (str): The role of the message.
-            content (str): The content of the message.
-            tools (list[dict]): The tools associated with the message.
-
-        Returns:
-            dict: The message dictionary.
-        """
-        message = {"role": role, "content": content}
-        if tools:
-            message["tools"] = tools
-        return message

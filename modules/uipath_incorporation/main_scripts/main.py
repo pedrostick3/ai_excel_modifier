@@ -1,9 +1,9 @@
 import os
 import logging
 from datetime import datetime
-from modules.ai.services.openai_ai_service import OpenAiAiService
-from modules.ai.core.fine_tuning_agents.excel_fine_tuning_agent import ExcelFinetuningAgent
-from modules.ai.core.enums.file_category import FileCategory
+from modules.ai_manual_implementation.services.openai_ai_service import OpenAiAiService
+from modules.ai_manual_implementation.core.fine_tuning_agents.excel_fine_tuning_agent import ExcelFinetuningAgent
+from modules.ai_manual_implementation.core.enums.file_category import FileCategory
 from modules.excel.services.excel_service import ExcelService
 from modules.analytics.services.ai_analytics import AiAnalytics
 

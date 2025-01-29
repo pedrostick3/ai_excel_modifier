@@ -1,4 +1,4 @@
-from modules.ai_manual_implementation.core.enums.file_category import FileCategory
+from modules.ai_manual_implementation.enums.file_category import FileCategory
 
 CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT = f"""You are an assistant that handles Excel files.
 When someone asks to categorize a file and find the header of a table, your task is to return the category name of the file and identify where the table starts by finding the row with the column names.
@@ -7,9 +7,9 @@ When someone asks to categorize a file and find the header of a table, your task
 1.2. If the filename contains 'Test_Execution_data' (case-insensitive), then it belongs to the '{FileCategory.TESTE_EXECUCAO.value}' category and ignore the next '2.' step;
 1.3. If the filename does not contain any of the text indicated above, then a categorization should be made by its content;
 2. Content categorization:
-2.1. If the file has a blank first line and in the second line must have the exact columns 'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds' (case-insensitive), then category is '{FileCategory.EXECUCAO.value}'.
-2.2. If the file has in column A line 1 the label 'Test execution', in column A line 2 the label 'Total run time' and in line 4 must have the exact columns 'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds' (case-insensitive), then category is '{FileCategory.TESTE_EXECUCAO.value}'.
-2.3. If the file does not comply with the indicated cases, then category is '{FileCategory.INVALIDO.value}'.
+2.1. '{FileCategory.EXECUCAO.value}' category if the file has a blank first line and in the second line MUST have all the following columns (case-insensitive): 'ExecutionId, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, IsSuccessful, RunTimeSeconds, AverageRunTimeSeconds'.
+2.2. '{FileCategory.TESTE_EXECUCAO.value}' category if the file has in column A line 1 the label 'Test execution', in column A line 2 the label 'Total run time' and in line 4 MUST have all the following columns (case-insensitive): 'ExecutionId, IsSuccessful, RunTimeSeconds, ExecutionStartDate, ExecutionEndDate, TaskWorkload, CaseStartDate, CaseEndDate, AverageRunTimeSeconds'.
+2.3. '{FileCategory.INVALIDO.value}' category if the file does not comply with the indicated cases.
 
 Additional rules:
 No code-blocks or MARKDOWN are allowed in the response.
@@ -103,7 +103,7 @@ Complicado,NOME,DESCONTO,A1,Folha1,NIF,Nº PARTIC.,,.,€,Total;TOTAL;Factura,,S
     },
 ]
 
-CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_1 = [
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_1_E = [
     {
         "role": "system",
         "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
@@ -126,7 +126,7 @@ ExecutionId,ExecutionStartDate,ExecutionEndDate,TaskWorkload,IsSuccessful,RunTim
     },
 ]
 
-CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_2 = [
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_2_TE = [
     {
         "role": "system",
         "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
@@ -149,7 +149,7 @@ ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,Task
     },
 ]
 
-CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_3 = [
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_3_TE = [
     {
         "role": "system",
         "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
@@ -164,6 +164,98 @@ Total run time,3910,,,,,,
 ,,,,,,,
 ExecutionId,IsSuccessful,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
 153,1,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_4_E = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'fileriners e.xlsx'
+```csv
+,,,,,,,
+ExecutionId,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+153,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20
+153,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146
+153,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_5_E = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'monthly.xlsx'
+```csv
+,,,,,,,
+ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,IsSuccessful,RunTimeSeconds,AverageRunTimeSeconds
+2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,1,20,20
+2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:16:14.750,2024-10-30 12:18:40.463,1,146,146
+2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,1.00000,2024-10-30 12:18:41.737,2024-10-30 12:19:14.870,1,33,33
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_6_TE = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'template.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,,
+Total run time,3910,,,,,,
+,,,,,,,
+IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,TaskWorkload,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2.00000,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
+```""",
+    },
+    {
+        "role": "assistant",
+        "content": f'{{"category": "{FileCategory.INVALIDO.value}"}}',
+    },
+]
+
+CATEGORIZER_AND_HEADER_FINDER_PROMPTS_CATEGORY_INVALIDO_7_TE = [
+    {
+        "role": "system",
+        "content": CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+    },
+    {
+        "role": "user",
+        "content": """Categorize and find the header of the following file:
+Filename = 'TechComp.xlsx'
+```csv
+Test execution date,2024-10-30 12:15:38.947,,,,,,
+Total run time,3910,,,,,,
+,,,,,,,
+ExecutionId,IsSuccessful,RunTimeSeconds,ExecutionStartDate,ExecutionEndDate,CaseStartDate,CaseEndDate,AverageRunTimeSeconds
+153,1,20,2024-10-30 12:15:38.947,2024-10-30 12:19:15.973,2024-10-30 12:15:41.433,2024-10-30 12:16:01.763,20
 ```""",
     },
     {

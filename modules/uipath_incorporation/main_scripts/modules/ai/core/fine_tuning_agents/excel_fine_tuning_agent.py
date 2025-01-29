@@ -2,14 +2,14 @@ import logging
 import os
 import json
 import shutil
-from modules.ai.services.openai_ai_service import OpenAiAiService
+from modules.ai_manual_implementation.services.openai_ai_service import OpenAiAiService
 from modules.excel.services.excel_service import ExcelService
-from modules.ai.core.enums.file_category import FileCategory
+from modules.ai_manual_implementation.core.enums.file_category import FileCategory
 import modules.excel.constants.excel_constants as excel_constants
-from modules.ai.core.fine_tuning_agents.prompts import excel_categorizer_and_header_finder_agent_prompts
-from modules.ai.core.fine_tuning_agents.prompts import excel_pre_header_modifier_agent_prompts
-from modules.ai.core.fine_tuning_agents.prompts import excel_content_modifier_with_function_calling_agent_prompts
-from modules.ai.core.function_calling.enums.functions_to_call import FunctionsToCall
+from modules.ai_manual_implementation.core.fine_tuning_agents.prompts import excel_categorizer_and_header_finder_agent_prompts
+from modules.ai_manual_implementation.core.fine_tuning_agents.prompts import excel_pre_header_modifier_agent_prompts
+from modules.ai_manual_implementation.core.fine_tuning_agents.prompts import excel_content_modifier_with_function_calling_agent_prompts
+from modules.ai_manual_implementation.core.function_calling.enums.functions_to_call import FunctionsToCall
 
 class ExcelFinetuningAgent:
     """
