@@ -1,5 +1,5 @@
-from modules.ai_manual_implementation.core.enums.file_category import FileCategory
-from modules.ai_manual_implementation.core.function_calling.enums.functions_to_call import FunctionsToCall
+from modules.ai.core.enums.file_category import FileCategory
+from modules.ai.core.function_calling.enums.functions_to_call import FunctionsToCall
 
 CONTENT_MODIFIER_SYSTEM_PROMPT = f"""You are an assistant responsible for choosing the right function to call (tools - function calling).
 When someone asks to return the function to call that modifies the content of a file, if the category is:

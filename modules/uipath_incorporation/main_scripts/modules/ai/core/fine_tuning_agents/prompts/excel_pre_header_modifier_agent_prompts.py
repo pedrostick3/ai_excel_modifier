@@ -1,4 +1,4 @@
-from modules.ai_manual_implementation.core.enums.file_category import FileCategory
+from modules.ai.core.enums.file_category import FileCategory
 
 PRE_HEADER_MODIFIER_SYSTEM_PROMPT = f"""You are an assistant that handles Excel files.
 When someone asks to modify the pre-header of a file with the '{FileCategory.EXECUCAO.value}' category, your tasks are:

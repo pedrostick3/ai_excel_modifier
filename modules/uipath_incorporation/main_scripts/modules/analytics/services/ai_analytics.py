@@ -69,6 +69,10 @@ class AiAnalytics:
             "1 Million Tokens": 1000000,
         }
         pricings = {
+            "gpt-4o-mini-2024-07-18": {
+                "Pricing Input per 1M Tokens": 0.15,
+                "Pricing Output per 1M Tokens": 0.6,
+            },
             "gpt-4o-mini": {
                 "Pricing Input per 1M Tokens": 0.15,
                 "Pricing Output per 1M Tokens": 0.6,

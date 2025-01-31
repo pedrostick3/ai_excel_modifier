@@ -1,52 +1,52 @@
 import logging
 import os
+import ast
 import json
 import shutil
-from datetime import datetime
-from modules.ai.services.openai_ai_service import OpenAiAiService
+from modules.ai_langchain_implementation.services.langchain_ai_service import LangChainAiService
 from modules.excel.services.excel_service import ExcelService
-from modules.ai.core.enums.file_category import FileCategory
+from modules.ai_manual_implementation.enums.file_category import FileCategory
 import modules.excel.constants.excel_constants as excel_constants
-from modules.ai.core.fine_tuning_agents.prompts import excel_categorizer_and_header_finder_agent_prompts
-from modules.ai.core.fine_tuning_agents.prompts import excel_pre_header_modifier_agent_prompts
-from modules.ai.core.fine_tuning_agents.prompts import excel_content_modifier_with_function_calling_agent_prompts
-from modules.ai.core.function_calling.enums.functions_to_call import FunctionsToCall
+import constants.configs as configs
+from modules.ai_manual_implementation.fine_tuning_agents.excel_generic_agent.prompts import excel_categorizer_and_header_finder_agent_prompts
+from modules.ai_manual_implementation.fine_tuning_agents.excel_generic_agent.prompts import excel_pre_header_modifier_agent_prompts
+from modules.ai_manual_implementation.fine_tuning_agents.excel_generic_agent.prompts import excel_content_modifier_with_function_calling_agent_prompts
+from modules.ai_langchain_implementation.function_calling.poc3_functions_to_call import PoC3FunctionsToCall
 
-class ExcelFinetuningAgent:
+
+
+class PoC3LangChainAgent:
     """
-    Class to interact with the AI Fine-Tuning Agent.
+    This class is a Langchain implementation of the AI process for PoC3.
     """
     fine_tuning_model = None
 
-    def __init__(self,
-        ai_service: OpenAiAiService,
-        base_model: str,
-        fine_tuning_model: str,
-    ):
+    def __init__(self, ai_service: LangChainAiService):
         """
         Initialize the AI Agent.
         """
         self.ai_service = ai_service
-        self.base_model = base_model
-        self.fine_tuning_model = fine_tuning_model
-
+    
     def ask_ai(
         self,
-        user_prompt: str,
-        system_prompt: str = None,
-        tools: list[dict] = None,
+        prompt: list,
+        input_vars: dict = None,
+        functions_signature_list_for_tools: list = None,
         tool_choice: str = None,
         ai_analytics_file_name: str = None,
+        ai_analytics_agent_name: str = None,
         log_messages: bool = True,
     ) -> str:
         """
         Ask the AI for a response based on the given excel_data.
 
         Args:
-            user_prompt (str): The user prompt to be used.
-            tools (list[dict]): The tools to be used.
+            prompt (list): The prompt to be used.
+            input_vars (dict): The input variables to be used.
+            functions_signature_list_for_tools (list): The functions signature list for tools.
             tool_choice (str): Force the function calling by setting the tool choice to "required". [Source](https://community.openai.com/t/new-api-feature-forcing-function-calling-via-tool-choice-required/731488) 
             ai_analytics_file_name (str): The AI analytics file name to be used.
+            ai_analytics_agent_name (str): The AI analytics agent name to be used.
             log_messages (bool): Flag to indicate if the request messages should be logged.
 
         Returns:
@@ -54,23 +54,18 @@ class ExcelFinetuningAgent:
         """
         try:
             ai_response = self.ai_service.ask_ai(
-                model=self.fine_tuning_model,
-                base_model=self.base_model,
-                first_user_prompt=user_prompt,
-                system_prompt=system_prompt,
-                tools=tools,
+                prompt=prompt,
+                input_vars=input_vars,
+                functions_signature_list_for_tools=functions_signature_list_for_tools,
                 tool_choice=tool_choice,
-                use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
-                response_format=None,
                 ai_analytics_file_name=ai_analytics_file_name,
-                ai_analytics_agent_name="ExcelGenericFinetuningAgent",
-                log_request_messages=log_messages,
+                ai_analytics_agent_name=ai_analytics_agent_name,
                 log_response_message=log_messages,
             )
 
             return ai_response
         except Exception as e:
-            logging.error(f"Erro ao comunicar com o AI ExcelGenericFinetuningAgent: {e}")
+            logging.error(f"Erro ao comunicar com o AI PoC3Agent: {e}")
             raise
     
     def _handle_category_from_ai_category_agent_response_string(
@@ -80,7 +75,7 @@ class ExcelFinetuningAgent:
         excel_file_path: str,
         invalid_output_path: str,
         function_id_to_log: str,
-    ) -> str:
+    ) -> FileCategory:
         """
         Handle the category from the AI category agent response string.
 
@@ -92,7 +87,7 @@ class ExcelFinetuningAgent:
             function_id_to_log (str): The function ID to log.
 
         Returns:
-            str: The new file path.
+            FileCategory: The FileCategory.
         """
         try:
             ai_agent_response_dict = json.loads(ai_agent_response)
@@ -117,14 +112,13 @@ class ExcelFinetuningAgent:
             except shutil.Error as e:
                 logging.error(f"{function_id_to_log}: Erro ao guardar o ficheiro '{invalid_output_path}'.")
                 raise
-            return invalid_output_path
-
-        return f'{invalid_output_path}/{category.value} - {datetime.now().strftime("%d_%m_%Y")} - {file_name}'
+        
+        return category
 
     def get_file_category_and_header(
         self,
         excel_file_path: str,
-        invalid_output_path: str,
+        invalid_output_path: str = configs.OUTPUT_FOLDER,
         ai_analytics_file_name: str = None,
     ) -> dict:
         """
@@ -141,28 +135,36 @@ class ExcelFinetuningAgent:
         excel_data_first_5_rows = ExcelService.get_excel_csv_to_csv_str(excel_file_path, only_get_first_rows=5)
         file_name = os.path.basename(excel_file_path)
         excel_categorizer_and_header_finder_agent_response = self.ask_ai(
-            system_prompt=excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
-            user_prompt=f"""Categorize and find the header of the following file:
+            prompt=[
+                (
+                    "system",
+                    excel_categorizer_and_header_finder_agent_prompts.CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT,
+                ),
+                (
+                    "human",
+                    f"""Categorize and find the header of the following file:
 Filename = '{file_name}'
 ```csv
 {excel_data_first_5_rows}
 ```""",
+                ),
+            ],
             ai_analytics_file_name=ai_analytics_file_name,
+            ai_analytics_agent_name="PoC3LangChainAgent (ExcelCategorizerAndHeaderFinderAgent)",
         )
 
-        output_file_path = self._handle_category_from_ai_category_agent_response_string(
+        self._handle_category_from_ai_category_agent_response_string(
             ai_agent_response=excel_categorizer_and_header_finder_agent_response,
             file_name=file_name,
             excel_file_path=excel_file_path,
             invalid_output_path=invalid_output_path,
-            function_id_to_log="AI ExcelGenericFinetuningAgent - get_file_category_and_header()",
+            function_id_to_log="AI PoC3LangChainAgent - get_file_category_and_header()",
         )
 
         try:
             excel_categorizer_and_header_finder_agent_response_dict = json.loads(excel_categorizer_and_header_finder_agent_response)
-            excel_categorizer_and_header_finder_agent_response_dict["output_file_path"] = output_file_path
         except json.JSONDecodeError or ValueError as e:
-            logging.error(f"Warning - AI ExcelGenericFinetuningAgent - get_file_category_and_header(): Erro ao converter a resposta do AI para JSON: {e}\nexcel_categorizer_and_header_finder_agent_response = {excel_categorizer_and_header_finder_agent_response}")
+            logging.error(f"Warning - AI PoC3LangChainAgent - get_file_category_and_header(): Erro ao converter a resposta do AI para JSON: {e}\nexcel_categorizer_and_header_finder_agent_response = {excel_categorizer_and_header_finder_agent_response}")
             raise
             
         return excel_categorizer_and_header_finder_agent_response_dict if excel_categorizer_and_header_finder_agent_response_dict else {}
@@ -189,11 +191,20 @@ Filename = '{file_name}'
             bool: The success of the operation.
         """
         excel_data_first_rows_until_header = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path, only_get_first_rows=header_row_number)
-        logging.info(f"AI ExcelGenericFinetuningAgent - {category} - excel_data_first_rows_until_header = {excel_data_first_rows_until_header}")
+        logging.info(f"AI PoC3LangChainAgent - {category} - excel_data_first_rows_until_header = {excel_data_first_rows_until_header}")
         excel_pre_header_modifier_agent_response = self.ask_ai(
-            system_prompt=excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
-            user_prompt=f"Modify the pre-header of the following file that belongs to the '{category.value}' category:\n{excel_data_first_rows_until_header}",
+            prompt=[
+                (
+                    "system",
+                    excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
+                ),
+                (
+                    "human",
+                    f"Modify the pre-header of the following file that belongs to the '{category.value}' category:\n{excel_data_first_rows_until_header}",
+                ),
+            ],
             ai_analytics_file_name=ai_analytics_file_name,
+            ai_analytics_agent_name="PoC3LangChainAgent (ExcelPreHeaderModifierAgent)",
         )
 
         try:
@@ -206,11 +217,11 @@ Filename = '{file_name}'
             )
 
             if not success:
-                logging.error(f"Warning - AI ExcelGenericFinetuningAgent - Não foi possível guardar o ficheiro '{output_excel_file_path}'.")
+                logging.error(f"Warning - AI PoC3LangChainAgent - Não foi possível guardar o ficheiro '{output_excel_file_path}'.")
 
             return success
         except Exception as e:
-            logging.error(f"Erro ao processar o retorno do AI ExcelGenericFinetuningAgent: {e}")
+            logging.error(f"Erro ao processar o retorno do AI PoC3LangChainAgent: {e}")
             raise
     
     def modify_content_returning_function_calling(
@@ -237,45 +248,57 @@ Filename = '{file_name}'
         try:
             excel_data = ExcelService.get_excel_csv_to_csv_str(input_excel_file_path)
         except Exception as e:
-            logging.error(f"AI ExcelGenericFinetuningAgent: Error reading Excel file: {e}")
+            logging.error(f"AI PoC3LangChainAgent: Error reading Excel file: {e}")
             raise
 
         excel_lines = excel_data.split(excel_constants.EXCEL_LINE_BREAK)
         excel_lines_count = len(excel_lines) - 1
-        logging.info(f"AI ExcelGenericFinetuningAgent - {category} - The file '{input_excel_file_path}' has {excel_lines_count} lines.")
-        
+        logging.info(f"AI PoC3LangChainAgent - {category} - The file '{input_excel_file_path}' has {excel_lines_count} lines.")
+
         try:
             ai_response = self.ask_ai(
-                system_prompt=excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
-                user_prompt=f"""Return the function to call that modifies the content of the following file that belongs to the '{category.value}' category:
+                prompt=[
+                    (
+                        "system",
+                        excel_content_modifier_with_function_calling_agent_prompts.CONTENT_MODIFIER_SYSTEM_PROMPT,
+                    ),
+                    (
+                        "human",
+                        f"""Return the function to call that modifies the content of the following file that belongs to the '{category.value}' category:
 input_excel_file_path = '{input_excel_file_path}'
 output_excel_file_path = '{output_excel_file_path}'
 excel_header_row_index = {excel_header_row_index}""",
-                ai_analytics_file_name=ai_analytics_file_name,
-                tool_choice="required",
-                tools=[
-                    *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_EXECUTION_CATEGORY.value["tools"],
-                    *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_TEST_EXECUTION_CATEGORY.value["tools"],
+                    ),
                 ],
+                tool_choice="required",
+                functions_signature_list_for_tools=[
+                    PoC3FunctionsToCall.modify_excel_content_for_execution_category,
+                    PoC3FunctionsToCall.modify_excel_content_for_test_execution_category,
+                ],
+                ai_analytics_file_name=ai_analytics_file_name,
+                ai_analytics_agent_name="PoC3LangChainAgent (ExcelContentModifierWithFunctionCallingAgent)",
             )
         except Exception as e:
-            logging.error(f"AI ExcelGenericFinetuningAgent: Error communicating with AI: {e}")
+            logging.error(f"AI PoC3LangChainAgent: Error communicating with AI: {e}")
             raise
 
         try:
-            response_json = json.loads(ai_response)
+            response_json = json.load(ai_response) if self.ai_service._is_valid_json(ai_response) else ast.literal_eval(ai_response)
         except json.JSONDecodeError:
-            logging.error(f"AI ExcelGenericFinetuningAgent: Error parsing AI response JSON: {ai_response}")
+            logging.error(f"AI PoC3LangChainAgent: Error parsing AI response JSON: {ai_response}")
             raise
         
-        if "function" not in response_json:
-            logging.error(f"AI ExcelGenericFinetuningAgent: The AI response JSON does not contain the 'function' key. ai_response = {ai_response}")
+        if "name" not in response_json:
+            logging.error(f"AI PoC3LangChainAgent: The AI response JSON does not contain the 'name' key. ai_response = {ai_response}")
             raise
 
         try:
-            FunctionsToCall.get_enum_by_function_name(response_json["function"]["name"]).run_function_from_ai_response(
-                str_dict_func_args=response_json["function"]["arguments"],
-            )
+            if response_json["name"] == "modify_excel_content_for_execution_category":
+                tool_function_response = PoC3FunctionsToCall.modify_excel_content_for_execution_category.invoke(response_json["args"])
+            elif response_json["name"] == "modify_excel_content_for_test_execution_category":
+                tool_function_response = PoC3FunctionsToCall.modify_excel_content_for_test_execution_category.invoke(response_json["args"])
+            logging.info(f"LangChainAiService.test_tool_calling() - Tool function response: {tool_function_response}")
+            return tool_function_response
         except json.JSONDecodeError:
-            logging.error(f"AI ExcelGenericFinetuningAgent: Error executing function. response_json: {response_json}")
+            logging.error(f"AI PoC3LangChainAgent: Error executing function. response_json: {response_json}")
             raise

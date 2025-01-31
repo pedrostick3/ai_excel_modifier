@@ -1,5 +1,5 @@
 from modules.analytics.services.ai_analytics import AiAnalytics
-from modules.ai_manual_implementation.utils.token_utils import TokenUtils
+from modules.ai.utils.token_utils import TokenUtils
 import json
 import openai
 import logging

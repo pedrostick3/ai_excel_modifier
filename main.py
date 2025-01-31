@@ -7,6 +7,8 @@ from modules.ai_langchain_implementation.ai_langchain_implementation import AiLa
 AI_IMPLEMENTATION = AiImplementation.LANGCHAIN
 
 def main():
+    print("Main START")
+
     # PoC3 Files to process
     input_files = [
         ###### Main Files:
@@ -38,6 +40,7 @@ def main():
     ]
 
     if AI_IMPLEMENTATION == AiImplementation.MANUAL:
+        print("Main AI_IMPLEMENTATION == AiImplementation.MANUAL")
         AiManualImplementation.run(
             input_files=input_files,
             ai_type=AiType.FINE_TUNING,
@@ -48,6 +51,7 @@ def main():
             finetuning_model=configs.OPENAI_FINE_TUNING_MODEL_29_01_2025_WITH_VALIDATION_FILE
         )
     elif AI_IMPLEMENTATION == AiImplementation.LANGCHAIN:
+        print("Main AI_IMPLEMENTATION == AiImplementation.LANGCHAIN")
         AiLangChainImplementation.run(
             input_files=input_files,
             ai_type=AiType.FINE_TUNING,
@@ -57,6 +61,8 @@ def main():
             finetuning_base_model=configs.OPENAI_FINE_TUNING_BASE_MODEL,
             finetuning_model=configs.OPENAI_FINE_TUNING_MODEL_29_01_2025_WITH_VALIDATION_FILE
         )
+        
+    print("Main END")
 
 
 if __name__ == "__main__":

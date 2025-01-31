@@ -1,4 +1,4 @@
-from modules.ai_manual_implementation.core.enums.file_category import FileCategory
+from modules.ai.core.enums.file_category import FileCategory
 
 CATEGORIZER_AND_HEADER_FINDER_SYSTEM_PROMPT = f"""You are an assistant that handles Excel files.
 When someone asks to categorize a file and find the header of a table, your task is to return the category name of the file and identify where the table starts by finding the row with the column names.
