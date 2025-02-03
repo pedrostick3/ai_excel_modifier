@@ -54,12 +54,7 @@ def main():
         print("Main AI_IMPLEMENTATION == AiImplementation.LANGCHAIN")
         AiLangChainImplementation.run(
             input_files=input_files,
-            ai_type=AiType.FINE_TUNING,
-            custom_ai_service_base_url=configs.GITHUB_BASE_URL,
-            custom_ai_service_key=configs.GITHUB_KEY,
-            custom_ai_service_model=configs.GITHUB_MODEL,
-            finetuning_base_model=configs.OPENAI_FINE_TUNING_BASE_MODEL,
-            finetuning_model=configs.OPENAI_FINE_TUNING_MODEL_29_01_2025_WITH_VALIDATION_FILE
+            finetuning_model=configs.OPENAI_FINE_TUNING_MODEL_29_01_2025_WITH_VALIDATION_FILE,
         )
         
     print("Main END")

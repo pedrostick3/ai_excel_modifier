@@ -16,7 +16,7 @@ def runExcelAiAgentWith(
     input_excel_file_path: str,
     output_folder_path: str = "./assets/docs_output",
     is_to_log: bool = False,
-) -> str:
+) -> dict:
     """
     Run the Excel AI Agent with the given parameters.
 
@@ -27,7 +27,7 @@ def runExcelAiAgentWith(
         is_to_log (bool): Flag to indicate if it is to log.
 
     Returns:
-        str: The output Excel file path.
+        dict: The output Excel file path and category.
 
     Example:
         file_path_result = runExcelAiAgentWith(
@@ -87,7 +87,10 @@ def runExcelAiAgentWith(
         logging.info(f"# END - runExcelAiAgentWith() - output_file_path: {output_file_path} ")
         logging.info(AiAnalytics.__str__())
         AiAnalytics.export_str_ai_analytics_data_to_excel()
-        return output_file_path
+        return {
+            "output_file_path": output_file_path,
+            "file_category": file_category.value,
+        }
 
     # Get header from the agent response
     try:
@@ -125,11 +128,15 @@ def runExcelAiAgentWith(
     logging.info(AiAnalytics.__str__())
     AiAnalytics.export_str_ai_analytics_data_to_excel()
 
-    return output_file_path
+    return {
+        "output_file_path": output_file_path,
+        "file_category": file_category.value,
+    }
 
 def runEmailGenAgentWith(
     openai_api_key: str,
     email_content: str,
+    processed_files: list[dict],
     is_to_log: bool = False,
 ) -> str:
     """
@@ -138,6 +145,7 @@ def runEmailGenAgentWith(
     Args:
         openai_api_key (str): The OpenAI API key.
         email_content (str): The email content.
+        processed_files (list[dict]): The processed files information.
         is_to_log (bool): Flag to indicate if it is to log.
 
     Returns:
@@ -159,7 +167,10 @@ def runEmailGenAgentWith(
     )
 
     # Obter resposta do AI
-    email_response = agent_service.generate_email_response(email_content)
+    email_response = agent_service.generate_email_response(
+        email_content=email_content,
+        processed_files=processed_files,
+    )
     logging.info(f"# END - runEmailGenAgentWith() - Email response: {email_response}")
     
     logging.info(AiAnalytics.__str__())
@@ -194,10 +205,15 @@ def testRunExcelAiAgentOnly(
 def testRunEmailGenAgentOnly(
     openai_api_key: str,
     email_content: str = "Hello Nexis, I hope you are doing well. I am contacting you to process the attached file. Awaiting your response, Daniel Soares",
+    processed_files: list[dict] = [{
+            "output_file_path": "./assets/docs_input/Test_Execution_data Template.xlsx",
+            "file_category": "Teste Execução",
+    }],
 ) -> str:
     email_response = runEmailGenAgentWith(
         openai_api_key=openai_api_key,
         email_content=email_content,
+        processed_files=processed_files,
     )
     return email_response
 
@@ -212,40 +228,42 @@ def testRunBothAgents(
     output_folder_path: str = "./assets/docs_output",
 ) -> str:
     to_return = {}
-    to_return["email_content"] = runEmailGenAgentWith(
-        openai_api_key=openai_api_key,
-        email_content=email_content,
-    )
-
     to_return["processed_files"] = []
     for file_path in files_paths:
-        result_file_path = runExcelAiAgentWith(
+        file_result = runExcelAiAgentWith(
             openai_api_key=openai_api_key,
             input_excel_file_path=file_path,
             output_folder_path=output_folder_path,
         )
-        to_return["processed_files"].append(result_file_path)
+        to_return["processed_files"].append(file_result)
+
+    to_return["email_content"] = runEmailGenAgentWith(
+        openai_api_key=openai_api_key,
+        email_content=email_content,
+        processed_files=to_return["processed_files"],
+    )
 
     return json.dumps(to_return)
 
 def testRunBothAgentsWithSingleFile(
     openai_api_key: str,
-    email_content: str,
-    file_path: str,
+    email_content: str = "Hello Nexis, I hope you are doing well. I am contacting you to process the attached file. Awaiting your response, Daniel Soares",
+    file_path: str = "./assets/docs_input/Test_Execution_data Template.xlsx",
     output_folder_path: str = "./assets/docs_output",
 ) -> str:
     to_return = {}
-    to_return["email_content"] = runEmailGenAgentWith(
-        openai_api_key=openai_api_key,
-        email_content=email_content,
-    )
-
-    result_file_path = runExcelAiAgentWith(
+    file_result = runExcelAiAgentWith(
         openai_api_key=openai_api_key,
         input_excel_file_path=file_path,
         output_folder_path=output_folder_path,
     )
-    to_return["processed_file"] = result_file_path
+    to_return["processed_file"] = file_result
+
+    to_return["email_content"] = runEmailGenAgentWith(
+        openai_api_key=openai_api_key,
+        email_content=email_content,
+        processed_files=[to_return["processed_file"]],
+    )
 
     return json.dumps(to_return)
 

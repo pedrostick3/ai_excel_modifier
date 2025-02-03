@@ -37,6 +37,7 @@ class ExcelFinetuningAgent:
         tools: list[dict] = None,
         tool_choice: str = None,
         ai_analytics_file_name: str = None,
+        ai_analytics_agent_name: str = None,
         log_messages: bool = True,
     ) -> str:
         """
@@ -47,6 +48,7 @@ class ExcelFinetuningAgent:
             tools (list[dict]): The tools to be used.
             tool_choice (str): Force the function calling by setting the tool choice to "required". [Source](https://community.openai.com/t/new-api-feature-forcing-function-calling-via-tool-choice-required/731488) 
             ai_analytics_file_name (str): The AI analytics file name to be used.
+            ai_analytics_agent_name (str): The AI analytics agent name to be used.
             log_messages (bool): Flag to indicate if the request messages should be logged.
 
         Returns:
@@ -63,7 +65,7 @@ class ExcelFinetuningAgent:
                 use_assistant_instead_of_system=False,  # True caso o modelo seja "o1-preview" ou "o1-mini"
                 response_format=None,
                 ai_analytics_file_name=ai_analytics_file_name,
-                ai_analytics_agent_name="ExcelGenericFinetuningAgent",
+                ai_analytics_agent_name=ai_analytics_agent_name,
                 log_request_messages=log_messages,
                 log_response_message=log_messages,
             )
@@ -148,6 +150,7 @@ Filename = '{file_name}'
 {excel_data_first_5_rows}
 ```""",
             ai_analytics_file_name=ai_analytics_file_name,
+            ai_analytics_agent_name="ExcelGenericFinetuningAgent (ExcelCategorizerAndHeaderFinderAgent)",
         )
 
         output_file_path = self._handle_category_from_ai_category_agent_response_string(
@@ -194,6 +197,7 @@ Filename = '{file_name}'
             system_prompt=excel_pre_header_modifier_agent_prompts.PRE_HEADER_MODIFIER_SYSTEM_PROMPT,
             user_prompt=f"Modify the pre-header of the following file that belongs to the '{category.value}' category:\n{excel_data_first_rows_until_header}",
             ai_analytics_file_name=ai_analytics_file_name,
+            ai_analytics_agent_name="ExcelGenericFinetuningAgent (ExcelPreHeaderModifierAgent)",
         )
 
         try:
@@ -252,6 +256,7 @@ input_excel_file_path = '{input_excel_file_path}'
 output_excel_file_path = '{output_excel_file_path}'
 excel_header_row_index = {excel_header_row_index}""",
                 ai_analytics_file_name=ai_analytics_file_name,
+                ai_analytics_agent_name="ExcelGenericFinetuningAgent (ExcelContentModifierWithFunctionCallingAgent)",
                 tool_choice="required",
                 tools=[
                     *FunctionsToCall.MODIFY_EXCEL_CONTENT_FOR_EXECUTION_CATEGORY.value["tools"],

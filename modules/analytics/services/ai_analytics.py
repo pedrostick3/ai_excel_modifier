@@ -71,6 +71,10 @@ class AiAnalytics:
             "MAX_EXCEL_LINES_PER_AI_REQUEST": configs.MAX_EXCEL_LINES_PER_AI_REQUEST,
         }
         pricings = {
+            "gpt-4o-mini-2024-07-18": {
+                "Pricing Input per 1M Tokens": 0.15,
+                "Pricing Output per 1M Tokens": 0.6,
+            },
             "gpt-4o-mini": {
                 "Pricing Input per 1M Tokens": 0.15,
                 "Pricing Output per 1M Tokens": 0.6,

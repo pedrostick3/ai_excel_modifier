@@ -6,6 +6,7 @@ from modules.excel.services.excel_service import ExcelService
 from modules.ai_langchain_implementation.poc3_agent.poc3_langchain_agent import PoC3LangChainAgent
 from modules.ai_langchain_implementation.services.langchain_ai_service import LangChainAiService
 from modules.ai_manual_implementation.enums.file_category import FileCategory
+from modules.analytics.services.ai_analytics import AiAnalytics
 
 class AiLangChainImplementation:
     """
@@ -110,3 +111,6 @@ class AiLangChainImplementation:
                 ai_analytics_file_name=os.path.basename(file_path),
             )
             logging.info("#4. END - ExcelGenericFinetuningAgent - modify_content_returning_function_calling()")
+
+        logging.info(AiAnalytics.__str__())
+        AiAnalytics.export_str_ai_analytics_data_to_excel()

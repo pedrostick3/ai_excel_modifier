@@ -67,12 +67,14 @@ class EmailGenAgent:
     def generate_email_response(
         self,
         email_content: str,
+        processed_files: list[dict],
     ) -> str:
         """
         Generate the email response based on the given email content.
 
         Args:
             email_content (str): The email content.
+            processed_files (list[dict]): The processed files.
 
         Returns:
             str: The AI's email response.
@@ -80,7 +82,7 @@ class EmailGenAgent:
         logging.info(f"AI EmailGenAgent - email_content = {email_content}")
         agent_response = self.ask_ai(
             system_prompt=email_gen_agent_prompts.EMAIL_GEN_SYSTEM_PROMPT,
-            user_prompt=f"Generate an email content response for the following email:\n{email_content}",
+            user_prompt=f"With this processed files:\n```{processed_files}```\nGenerate an email content response for the following email:\n{email_content}",
             example_prompts=email_gen_agent_prompts.EMAIL_GEN_EXAMPLE_PROMPTS,
         )
         logging.info(f"AI EmailGenAgent - agent_response = {agent_response}")

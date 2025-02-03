@@ -102,7 +102,7 @@ class AiAnalytics:
 
                 for line in data_lines:
                     match = re.search(
-                        r"(\w+) - ai_model=([a-zA-Z0-9_\-:.]+) CompletionUsage\(prompt_tokens=(\d+), completion_tokens=(\d+), total_tokens=(\d+)\) - Demorou ([\d\.]+s)",
+                        r"(\w+\s*(?:\([^)]+\))?)\s*- ai_model=([a-zA-Z0-9_\-:.]+)\s+CompletionUsage\(prompt_tokens=(\d+),\s+completion_tokens=(\d+),\s+total_tokens=(\d+)\)\s+- Demorou\s+([\d\.]+s)",
                         line,
                     )
                     if not match:
