@@ -227,8 +227,7 @@ def testRunBothAgents(
     ],
     output_folder_path: str = "./assets/docs_output",
 ) -> str:
-    to_return = {}
-    to_return["processed_files"] = []
+    to_return = {"processed_files": []}
     for file_path in files_paths:
         file_result = runExcelAiAgentWith(
             openai_api_key=openai_api_key,
